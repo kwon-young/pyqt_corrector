@@ -259,8 +259,7 @@ class ImageViewer(QWidget):
         self.view = SmoothView(self.scene)
 
         self.directory = None
-        self.imageName = None
-        self.pixmap = None
+        self.page = None
         self.graphicsPixmapItem = None
         self.resizableRects = []
 
@@ -270,23 +269,24 @@ class ImageViewer(QWidget):
         data: TableModel = index.model()
         tableData = data.data(index, Qt.UserRole)
         page = tableData["page"][index.row()]
-        path = os.path.join(self.directory, f"*{page}*")
-        names = glob.glob(path)
-        if not names:
-            self.imageNotFound.emit(f"no image found in {path}")
-            return
-        if self.graphicsPixmapItem is not None:
-            self.scene.removeItem(self.graphicsPixmapItem)
-        self.imageName = names[0]
-        self.pixmap = QPixmap(self.imageName)
-        self.graphicsPixmapItem = self.scene.addPixmap(self.pixmap)
+        if self.page != page:
+            path = os.path.join(self.directory, f"*{page}*")
+            names = glob.glob(path)
+            if not names:
+                self.imageNotFound.emit(f"no image found in {path}")
+                return
+            if self.graphicsPixmapItem is not None:
+                self.scene.removeItem(self.graphicsPixmapItem)
+            pixmap = QPixmap(names[0])
+            self.graphicsPixmapItem = self.scene.addPixmap(pixmap)
 
-        labels = tableData["label"].unique()
-        color_map = {label: QColor(*[int(c * 255) for c in color]) for label,
-                     color in zip(labels, seaborn.color_palette(
-                         None, len(labels)))}
+            labels = tableData["label"].unique()
+            labels.sort()
+            color_map = {label: QColor(*[int(c * 255) for c in color])
+                         for label, color in zip(labels, seaborn.color_palette(
+                             None, len(labels)))}
 
-        self.drawBoxes(tableData, color_map)
+            self.drawBoxes(tableData, color_map)
 
         boundingRect = tableData["box"][index.row()]
         margin_size = min(boundingRect.width(), boundingRect.height()) / 2
