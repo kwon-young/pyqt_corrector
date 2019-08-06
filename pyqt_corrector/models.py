@@ -7,7 +7,13 @@ Description: Implement qt data models.
 """
 
 from PySide2.QtCore import QModelIndex, QAbstractTableModel
-from PySide2.QtCore import Qt
+from PySide2.QtCore import Qt, QRect
+
+
+def box2QRect(box):
+    x1, y1, x2, y2 = [int(coord) for coord in box.split("x")]
+    width, height = x2 - x1, y2 - y1
+    return QRect(x1, y1, width, height)
 
 
 class TableModel(QAbstractTableModel):
@@ -52,9 +58,17 @@ class TableModel(QAbstractTableModel):
         if self._data is None:
             return None
 
-        if role in [Qt.DisplayRole, Qt.UserRole]:
+        if role == Qt.DisplayRole:
             return self._data.iloc[index.row()][index.column()]
-
+        if role == Qt.UserRole:
+            if index.column() == 0:
+                return self._data.iloc[index.row()][index.column()], None, []
+            # if index.column() == 1:
+                # return self._data.iloc[index.row()][index.column()]
+            if index.column() == 2:
+                page, label, box = self._data.iloc[index.row()]
+                box = box2QRect(box)
+                return page, label, [box]
         return None
 
     def headerData(self, section, orientation, role):

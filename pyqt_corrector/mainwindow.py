@@ -34,13 +34,15 @@ class MainWindow(QMainWindow):
 
         self.ui.actionOpen_directory.triggered.connect(self.openDirectory)
 
-        self.statusLabel = QLabel()
-        self.ui.statusbar.addWidget(self.statusLabel)
+        self.messageLabel = QLabel()
+        self.ui.statusbar.addWidget(self.messageLabel)
+        self.coordLabel = QLabel()
+        self.ui.statusbar.addWidget(self.coordLabel)
 
         self.imageViewer = ImageViewer(self.ui.scrollAreaWidgetContents)
         self.ui.gridLayout.addWidget(self.imageViewer.view, 0, 0, 1, 1)
-        self.imageViewer.imageNotFound.connect(self.statusLabel.setText)
-
+        self.imageViewer.imageNotFound.connect(self.messageLabel.setText)
+        self.imageViewer.view.mouseMoved.connect(self.coordLabel.setText)
 
         self.tabs = []
         self.gridLayouts_1 = []
@@ -140,10 +142,3 @@ class MainWindow(QMainWindow):
             self.tableViews[tab_index].activated.disconnect(
                 self.imageViewer.update)
         self.ui.tabWidget.removeTab(tab_index)
-
-    @Slot()
-    def itemSelected(self, index: QModelIndex):
-        """New item is selected
-        Multiple actions are required:
-        * update displayed image
-        """
