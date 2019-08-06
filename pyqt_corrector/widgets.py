@@ -260,6 +260,7 @@ class ImageViewer(QWidget):
         margin_size = min(boundingRect.width(), boundingRect.height()) / 2
         margin = QMarginsF(*([margin_size] * 4))
         self.view.fitInView(boundingRect + margin, Qt.KeepAspectRatio)
+        self.view.setFocus()
 
     def drawBoxes(self, boxes):
         newRubberBands = []
