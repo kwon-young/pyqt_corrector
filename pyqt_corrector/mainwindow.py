@@ -72,7 +72,11 @@ class MainWindow(QMainWindow):
     def readData(self):
         """Read csv data into pandas DataFrame"""
         dataset_files = glob.glob(os.path.join(self.directory, "*.csv"))
-        self.datasets = {name: pd.read_csv(name) for name in dataset_files}
+        self.datasets = {
+            name: pd.read_csv(
+                name, header=0, skipinitialspace=True, skip_blank_lines=True,
+                comment="#")
+            for name in dataset_files}
         self.datasetsChanged.emit()
 
     @Slot()

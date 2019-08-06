@@ -1,9 +1,10 @@
 import os
 import glob
 from itertools import zip_longest
+import seaborn
 from PySide2.QtWidgets import QWidget, QGraphicsScene, QGraphicsView, QGraphicsRectItem, QStyleOptionGraphicsItem, QCommonStyle, QStyle, QGraphicsSceneHoverEvent, QGraphicsItem, QGraphicsSceneMouseEvent
 from PySide2.QtCore import Slot, Signal, QModelIndex, Qt, QTimeLine, QPointF, QRect, QMarginsF, QRectF, QSizeF
-from PySide2.QtGui import QPixmap, QWheelEvent, QKeyEvent, QMouseEvent, QResizeEvent, QPainter, QPainterPath
+from PySide2.QtGui import QPixmap, QWheelEvent, QKeyEvent, QMouseEvent, QResizeEvent, QPainter, QPainterPath, QColor, QPen
 from pyqt_corrector.models import TableModel
 
 
@@ -69,7 +70,28 @@ class SmoothView(QGraphicsView):
         super().mouseMoveEvent(event)
 
 
-class ResizableRect(QGraphicsRectItem):
+class ColorRect(QGraphicsRectItem):
+
+    """Rect with configurable color"""
+
+    def __init__(self, parent):
+        """Constructor
+
+        """
+        super().__init__(parent)
+
+        self.color = None
+
+    def setColor(self, color):
+        self.color = color
+
+    def paint(self, painter: QPainter, option: QStyleOptionGraphicsItem,
+              widget: QWidget):
+        painter.setPen(QPen(self.color))
+        painter.drawRect(self.rect())
+
+
+class ResizableRect(ColorRect):
 
     """Resizable rect showing a bounding box"""
 
@@ -79,7 +101,7 @@ class ResizableRect(QGraphicsRectItem):
         """
         super().__init__(parent)
         # handle starting at topleft, going clockwise
-        self.handles = [QGraphicsRectItem(self) for _ in range(8)]
+        self.handles = [ColorRect(self) for _ in range(8)]
         self.setVisible(True)
         self.setAcceptHoverEvents(True)
         self.setFiltersChildEvents(True)
@@ -132,6 +154,11 @@ class ResizableRect(QGraphicsRectItem):
     def setHandlesVisible(self, state):
         for handle in self.handles:
             handle.setVisible(state)
+
+    def setColor(self, color):
+        self.color = color
+        for handle in self.handles:
+            handle.setColor(color)
 
     def hoverEnterEvent(self, event: QGraphicsSceneHoverEvent):
         self.setHandlesVisible(True)
@@ -241,39 +268,45 @@ class ImageViewer(QWidget):
     def update(self, index: QModelIndex):
         """Update image and bounding boxes from new index"""
         data: TableModel = index.model()
-        page, label, boxes = data.data(index, Qt.UserRole)
+        tableData = data.data(index, Qt.UserRole)
+        page = tableData["page"][index.row()]
         path = os.path.join(self.directory, f"*{page}*")
         names = glob.glob(path)
         if not names:
             self.imageNotFound.emit(f"no image found in {path}")
             return
+        if self.graphicsPixmapItem is not None:
+            self.scene.removeItem(self.graphicsPixmapItem)
         self.imageName = names[0]
         self.pixmap = QPixmap(self.imageName)
         self.graphicsPixmapItem = self.scene.addPixmap(self.pixmap)
 
-        if boxes:
-            self.drawBoxes(boxes)
+        labels = tableData["label"].unique()
+        color_map = {label: QColor(*[int(c * 255) for c in color]) for label,
+                     color in zip(labels, seaborn.color_palette(
+                         None, len(labels)))}
 
-        boundingRect = QRectF(0, 0, 0, 0)
-        for box in boxes:
-            boundingRect |= box
+        self.drawBoxes(tableData, color_map)
+
+        boundingRect = tableData["box"][index.row()]
         margin_size = min(boundingRect.width(), boundingRect.height()) / 2
         margin = QMarginsF(*([margin_size] * 4))
         self.view.fitInView(boundingRect + margin, Qt.KeepAspectRatio)
         self.view.setFocus()
 
-    def drawBoxes(self, boxes):
+    def drawBoxes(self, data, color_map):
         newRubberBands = []
-        for box, resizableRect in zip_longest(
-                boxes, self.resizableRects):
-            if box is None:
+        for rowData, resizableRect in zip_longest(
+                data.values, self.resizableRects):
+            if rowData is None:
                 # means there are more resizableRects than boxes to draw
                 self.scene.removeItem(resizableRect)
-            elif resizableRect is None:
+                continue
+            if resizableRect is None:
                 # means there are more boxes to draw than resizableRects
                 resizableRect = ResizableRect(self.graphicsPixmapItem)
-                resizableRect.setRect(box)
                 newRubberBands.append(resizableRect)
-            else:
-                # existing box and resizableRect
-                resizableRect.setRect(box)
+            page, label, box = rowData
+            resizableRect.setRect(box)
+            resizableRect.setColor(color_map[label])
+            resizableRect.setToolTip(label)
