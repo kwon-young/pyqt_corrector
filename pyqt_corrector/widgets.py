@@ -2,7 +2,7 @@ import os
 import glob
 from PySide2.QtWidgets import QWidget, QGraphicsScene, QGraphicsView
 from PySide2.QtCore import Slot, Signal, QModelIndex, Qt, QTimeLine, QPointF
-from PySide2.QtGui import QPixmap, QWheelEvent, QKeyEvent
+from PySide2.QtGui import QPixmap, QWheelEvent, QKeyEvent, QMouseEvent
 from pyqt_corrector.models import TableModel
 
 
@@ -19,6 +19,8 @@ class SmoothView(QGraphicsView):
         self._numScheduledScalings = 0
         self._maxScaling = 4
         self._zoomState = False
+        self._posOnClick = None
+        # self.setDragMode(QGraphicsView.ScrollHandDrag)
 
     @Slot()
     def keyPressEvent(self, event: QKeyEvent):
@@ -60,6 +62,22 @@ class SmoothView(QGraphicsView):
     def animFinished(self):
         anim = self.sender()
         del anim
+
+    @Slot()
+    def mousePressEvent(self, event: QMouseEvent):
+        if event.button() == Qt.MiddleButton:
+            self._posOnClick = self.mapToScene(event.pos())
+
+    @Slot()
+    def mouseMoveEvent(self, event: QMouseEvent):
+        if event.buttons() & Qt.MiddleButton:
+            newPos = self.mapToScene(event.pos())
+            dxdy = self._posOnClick - newPos
+            viewRect = self.mapToScene(self.viewport().geometry())
+            viewRect = viewRect.boundingRect()
+            viewCenter = viewRect.center()
+            self.centerOn(viewCenter + dxdy)
+            self._posOnClick = newPos
 
 
 class ImageViewer(QWidget):
