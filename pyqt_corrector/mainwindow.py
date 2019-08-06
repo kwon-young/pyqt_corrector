@@ -9,12 +9,13 @@ import os
 import glob
 import pandas as pd
 
-from PySide2.QtWidgets import QMainWindow, QFileDialog, QApplication, QWidget, QGridLayout, QTableView
-from PySide2.QtCore import QFile, Signal, Slot
+from PySide2.QtWidgets import QMainWindow, QFileDialog, QApplication, QWidget, QGridLayout, QTableView, QLabel
+from PySide2.QtCore import QFile, Signal, Slot, QModelIndex
 from PySide2.QtUiTools import QUiLoader
 
 from pyqt_corrector.mainwindow_ui import Ui_MainWindow
 from pyqt_corrector.models import TableModel
+from pyqt_corrector.widgets import ImageViewer
 
 
 class MainWindow(QMainWindow):
@@ -32,6 +33,14 @@ class MainWindow(QMainWindow):
         self.ui.setupUi(self)
 
         self.ui.actionOpen_directory.triggered.connect(self.openDirectory)
+
+        self.statusLabel = QLabel()
+        self.ui.statusbar.addWidget(self.statusLabel)
+
+        self.imageViewer = ImageViewer(self.ui.scrollAreaWidgetContents)
+        self.ui.gridLayout.addWidget(self.imageViewer.view, 0, 0, 1, 1)
+        self.imageViewer.imageNotFound.connect(self.statusLabel.setText)
+
 
         self.tabs = []
         self.gridLayouts_1 = []
@@ -53,7 +62,8 @@ class MainWindow(QMainWindow):
         self.directory = QFileDialog.getExistingDirectory(
             self,
             QApplication.translate("MainWindow", "Open directory", None, -1),
-            "")
+            "/home/kwon-young/Documents/choi_dataset")
+        self.imageViewer.directory = self.directory
         self.changedDirectory.emit()
 
     @Slot()
@@ -73,6 +83,8 @@ class MainWindow(QMainWindow):
                 self.createTab(name, dataset)
         for i in range(len(self.datasets), numTabs):
             self.deleteTab(i)
+        tab_index = self.ui.tabWidget.currentIndex()
+        self.tableViews[tab_index].activated.connect(self.imageViewer.update)
 
     def createTab(self, name, dataset):
         """Create a tab for dataset"""
@@ -122,4 +134,14 @@ class MainWindow(QMainWindow):
         return
 
     def deleteTab(self, tab_index):
+        if self.ui.tabWidget.currentIndex() == tab_index:
+            self.tableViews[tab_index].activated.disconnect(
+                self.imageViewer.update)
         self.ui.tabWidget.removeTab(tab_index)
+
+    @Slot()
+    def itemSelected(self, index: QModelIndex):
+        """New item is selected
+        Multiple actions are required:
+        * update displayed image
+        """

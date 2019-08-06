@@ -49,13 +49,13 @@ class TableModel(QAbstractTableModel):
         if not index.isValid():
             return None
 
-        if role != Qt.DisplayRole:
-            return None
-
         if self._data is None:
             return None
 
-        return self._data.iloc[index.row()][index.column()]
+        if role in [Qt.DisplayRole, Qt.UserRole]:
+            return self._data.iloc[index.row()][index.column()]
+
+        return None
 
     def headerData(self, section, orientation, role):
         """Get header at given section"""
