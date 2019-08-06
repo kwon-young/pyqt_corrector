@@ -20,7 +20,7 @@ class SmoothView(QGraphicsView):
         super().__init__(parent)
 
         self._numScheduledScalings = 0
-        self._maxScaling = 4
+        self._maxScaling = 20
         self._zoomState = False
         self.setDragMode(QGraphicsView.ScrollHandDrag)
         self.setMouseTracking(True)
@@ -253,6 +253,13 @@ class ImageViewer(QWidget):
 
         if boxes:
             self.drawBoxes(boxes)
+
+        boundingRect = QRectF(0, 0, 0, 0)
+        for box in boxes:
+            boundingRect |= box
+        margin_size = min(boundingRect.width(), boundingRect.height()) / 2
+        margin = QMarginsF(*([margin_size] * 4))
+        self.view.fitInView(boundingRect + margin, Qt.KeepAspectRatio)
 
     def drawBoxes(self, boxes):
         newRubberBands = []
