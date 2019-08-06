@@ -3,8 +3,8 @@
 # Form implementation generated from reading ui file 'data/mainwindow.ui',
 # licensing of 'data/mainwindow.ui' applies.
 #
-# Created: Tue Aug  6 09:55:11 2019
-#      by: pyside2-uic  running on PySide2 5.9.0~a1
+# Created: Tue Aug  6 23:04:02 2019
+#      by: pyside2-uic  running on PySide2 5.13.0
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -30,7 +30,7 @@ class Ui_MainWindow(object):
         self.scrollArea.setWidgetResizable(True)
         self.scrollArea.setObjectName("scrollArea")
         self.scrollAreaWidgetContents = QtWidgets.QWidget()
-        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 429, 499))
+        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 424, 477))
         self.scrollAreaWidgetContents.setObjectName("scrollAreaWidgetContents")
         self.gridLayout = QtWidgets.QGridLayout(self.scrollAreaWidgetContents)
         self.gridLayout.setObjectName("gridLayout")
@@ -39,7 +39,7 @@ class Ui_MainWindow(object):
         self.gridLayout_3.addLayout(self.gridLayout_2, 0, 0, 1, 1)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 800, 23))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 800, 29))
         self.menubar.setObjectName("menubar")
         self.menuFile = QtWidgets.QMenu(self.menubar)
         self.menuFile.setObjectName("menuFile")
@@ -68,6 +68,7 @@ class Ui_MainWindow(object):
         self.menuFile.setTitle(QtWidgets.QApplication.translate("MainWindow", "File", None, -1))
         self.toolBar.setWindowTitle(QtWidgets.QApplication.translate("MainWindow", "toolBar", None, -1))
         self.actionOpen_directory.setText(QtWidgets.QApplication.translate("MainWindow", "Open directory", None, -1))
+        self.actionOpen_directory.setShortcut(QtWidgets.QApplication.translate("MainWindow", "Ctrl+O", None, -1))
         self.actionQuit.setText(QtWidgets.QApplication.translate("MainWindow", "Quit", None, -1))
 
 

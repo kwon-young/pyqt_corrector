@@ -42,8 +42,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>429</width>
-            <height>499</height>
+            <width>424</width>
+            <height>477</height>
            </rect>
           </property>
           <layout class="QGridLayout" name="gridLayout"/>
@@ -61,7 +61,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>23</height>
+     <height>29</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -89,6 +89,9 @@
   <action name="actionOpen_directory">
    <property name="text">
     <string>Open directory</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
    </property>
   </action>
   <action name="actionQuit">
