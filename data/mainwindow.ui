@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
-    <height>600</height>
+    <width>978</width>
+    <height>784</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -25,7 +25,7 @@
         <widget class="QTabWidget" name="tabWidget">
          <property name="minimumSize">
           <size>
-           <width>345</width>
+           <width>379</width>
            <height>0</height>
           </size>
          </property>
@@ -42,11 +42,19 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>424</width>
-            <height>477</height>
+            <width>580</width>
+            <height>679</height>
            </rect>
           </property>
-          <layout class="QGridLayout" name="gridLayout"/>
+          <layout class="QGridLayout" name="gridLayout">
+           <item row="0" column="0">
+            <widget class="QComboBox" name="comboBox">
+             <property name="editable">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+          </layout>
          </widget>
         </widget>
        </widget>
@@ -60,8 +68,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>800</width>
-     <height>29</height>
+     <width>978</width>
+     <height>30</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">

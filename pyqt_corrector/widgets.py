@@ -2,10 +2,21 @@ import os
 import glob
 from itertools import zip_longest
 import seaborn
-from PySide2.QtWidgets import QWidget, QGraphicsScene, QGraphicsView, QGraphicsRectItem, QStyleOptionGraphicsItem, QCommonStyle, QStyle, QGraphicsSceneHoverEvent, QGraphicsItem, QGraphicsSceneMouseEvent, QGraphicsPixmapItem
-from PySide2.QtCore import Slot, Signal, QModelIndex, Qt, QTimeLine, QPointF, QRect, QMarginsF, QRectF, QSizeF
+from PySide2.QtWidgets import QWidget, QGraphicsScene, QGraphicsView, QGraphicsRectItem, QStyleOptionGraphicsItem, QCommonStyle, QStyle, QGraphicsSceneHoverEvent, QGraphicsItem, QGraphicsSceneMouseEvent, QGraphicsPixmapItem, QComboBox
+from PySide2.QtCore import Slot, Signal, QModelIndex, Qt, QTimeLine, QPointF, QRect, QMarginsF, QRectF, QSizeF, QObject
 from PySide2.QtGui import QPixmap, QWheelEvent, QKeyEvent, QMouseEvent, QResizeEvent, QPainter, QPainterPath, QColor, QPen
 from pyqt_corrector.models import TableModel
+
+
+class LabelComboBox(QComboBox):
+
+    """Combobox containing current object label"""
+
+    def __init__(self, parent=None):
+        """constructor
+
+        """
+        super().__init__(parent)
 
 
 class SmoothView(QGraphicsView):
@@ -81,25 +92,46 @@ class ColorRect(QGraphicsRectItem):
         super().__init__(parent)
 
         self.color = None
+        self.penWidth = 2
 
     def setColor(self, color):
         self.color = color
 
     def paint(self, painter: QPainter, option: QStyleOptionGraphicsItem,
               widget: QWidget):
-        painter.setPen(QPen(self.color, 3))
+        painter.setPen(QPen(self.color, self.penWidth))
         painter.drawRect(self.rect())
+
+    def boundingRect(self):
+        box = self.rect()
+        viewBox = self.mapRectFromScene(box)
+        margin = QMarginsF(*([self.penWidth] * 4))
+        viewBox += margin
+        box = self.mapRectToScene(viewBox)
+        return box
+
+class SignalHandler(QObject):
+
+    """Simple QObject relaying signal on behalf of QGraphicsItem"""
+
+    boxPressed = Signal(str, int)
+    boxChanged = Signal(str, int, QRectF)
+
+    def __init__(self, parent=None):
+        """Constructor """
+        super().__init__(parent)
 
 
 class ResizableRect(ColorRect):
 
     """Resizable rect showing a bounding box"""
 
-    def __init__(self, parent=None):
+    def __init__(self, signalHandler: SignalHandler, parent=None):
         """Constructor
 
         """
         super().__init__(parent)
+        self.signalHandler = signalHandler
         # handle starting at topleft, going clockwise
         self.handles = [ColorRect(self) for _ in range(8)]
         self.setVisible(True)
@@ -119,7 +151,7 @@ class ResizableRect(ColorRect):
 
     def setHandlesPos(self):
         box = self.rect()
-        handle_size = self.handleSize()
+        handle_size = max(self.handleSize(), 2)
         half_handle_size = handle_size / 2
         self.handles[0].setRect(
             box.left() - half_handle_size, box.top() - half_handle_size,
@@ -169,6 +201,7 @@ class ResizableRect(ColorRect):
         super().hoverLeaveEvent(event)
 
     def mousePressEvent(self, event: QGraphicsSceneMouseEvent):
+        self.signalHandler.boxPressed.emit(self.data(0), self.data(1))
         for i, handle in enumerate(self.handles):
             if handle.isUnderMouse():
                 self.handleSelected = i
@@ -190,48 +223,43 @@ class ResizableRect(ColorRect):
         pos = event.pos()
         if self.handleSelected == 0:
             new_size = box.bottomRight() - pos
-            width = max(new_size.x(), 1)
-            height = max(new_size.y(), 1)
+            width = max(new_size.x(), 0)
+            height = max(new_size.y(), 0)
             left = min(pos.x(), box.right())
             top = min(pos.y(), box.bottom())
             new_box = QRectF(left, top, width, height)
         elif self.handleSelected == 1:
-            height = max(box.bottom() - pos.y(), 1)
+            height = max(box.bottom() - pos.y(), 0)
             top = min(pos.y(), box.bottom())
             new_box = QRectF(box.left(), top, box.width(), height)
         elif self.handleSelected == 2:
             top = min(pos.y(), box.bottom())
-            width = max(pos.x() - box.left(), 1)
-            height = max(box.bottom() - pos.y(), 1)
+            width = max(pos.x() - box.left(), 0)
+            height = max(box.bottom() - pos.y(), 0)
             new_box = QRectF(box.left(), top, width, height)
         elif self.handleSelected == 3:
-            width = max(pos.x() - box.left(), 1)
+            width = max(pos.x() - box.left(), 0)
             new_box = QRectF(box.left(), box.top(), width, box.height())
         elif self.handleSelected == 4:
             new_size = pos - box.topLeft()
-            width = max(new_size.x(), 1)
-            height = max(new_size.y(), 1)
+            width = max(new_size.x(), 0)
+            height = max(new_size.y(), 0)
             new_box = QRectF(box.left(), box.top(), width, height)
         elif self.handleSelected == 5:
-            width = max(pos.x() - box.left(), 1)
+            height = max(pos.y() - box.top(), 0)
             new_box = QRectF(box.left(), box.top(), box.width(), height)
         elif self.handleSelected == 6:
             left = min(pos.x(), box.right())
-            width = max(box.right() - pos.x(), 1)
-            height = max(pos.y() - box.top(), 1)
+            width = max(box.right() - pos.x(), 0)
+            height = max(pos.y() - box.top(), 0)
             new_box = QRectF(left, box.top(), width, height)
         elif self.handleSelected == 7:
             left = min(pos.x(), box.right())
-            width = max(box.right() - pos.x(), 1)
+            width = max(box.right() - pos.x(), 0)
             new_box = QRectF(left, box.top(), width, box.height())
         self.setRect(new_box)
         self.setHandlesPos()
-
-    def boundingRect(self):
-        box = self.rect()
-        half_handle_size = self.handleSize() / 2
-        margin = QMarginsF(*([half_handle_size] * 4))
-        return box + margin
+        self.signalHandler.boxChanged.emit(self.data(0), self.data(1), new_box)
 
     def shape(self):
         path = QPainterPath()
@@ -253,6 +281,7 @@ class ImageViewer(QWidget):
         """
         super().__init__(parent)
 
+        self.signalHandler = SignalHandler(self)
         self.scene = QGraphicsScene()
         self.scene.clear()
 
@@ -323,18 +352,19 @@ class ImageViewer(QWidget):
         This function tries to reuse existing ResizableRect to draw newly given
         boxes. It will dynamically add more boxes and remove unused ones.
         """
-        for i, rowData in enumerate(data.values):
+        for i, (index, row) in enumerate(data.iterrows()):
             if i >= len(self.perModelResizableRects[name]):
                 # means there are more boxes to draw than resizableRects
-                resizableRect = ResizableRect()
+                resizableRect = ResizableRect(self.signalHandler)
                 self.perModelResizableRects[name].append(resizableRect)
                 self.scene.addItem(resizableRect)
             else:
                 resizableRect = self.perModelResizableRects[name][i]
-            _page, label, box = rowData
-            resizableRect.setRect(box)
-            resizableRect.setColor(color_map[label])
-            resizableRect.setToolTip(f"{name}: {label}")
+            resizableRect.setRect(row["box"])
+            resizableRect.setColor(color_map[row["label"]])
+            resizableRect.setToolTip(f"{name}: {row['label']}")
+            resizableRect.setData(0, name)
+            resizableRect.setData(1, index)
         # start by removing extraneous resizableBoxes
         for box in self.perModelResizableRects[name][len(data.values):]:
             self.scene.removeItem(box)

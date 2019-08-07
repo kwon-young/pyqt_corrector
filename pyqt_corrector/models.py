@@ -6,14 +6,19 @@ Date: 2019-08-05
 Description: Implement qt data models.
 """
 
-from PySide2.QtCore import QModelIndex, QAbstractTableModel
-from PySide2.QtCore import Qt, QRectF
+from PySide2.QtCore import QModelIndex, QAbstractTableModel, Qt, QRectF, QRect
 
 
 def box2QRect(box):
     x1, y1, x2, y2 = [int(coord) for coord in box.split("x")]
     width, height = x2 - x1, y2 - y1
     return QRectF(x1, y1, width, height)
+
+
+def QRectF2Box(rect):
+    [x1, y1, x2, y2] = [int(coor) for coor in [
+        rect.left(), rect.top(), rect.right(), rect.bottom()]]
+    return f"{x1}x{y1}x{x2}x{y2}"
 
 
 class TableModel(QAbstractTableModel):
@@ -92,7 +97,6 @@ class TableModel(QAbstractTableModel):
         tableData["box"] = tableData["box"].apply(box2QRect)
         return tableData
 
-
     def headerData(self, section, orientation, role):
         """Get header at given section"""
         if self._data is None:
@@ -101,9 +105,36 @@ class TableModel(QAbstractTableModel):
         if role == Qt.DisplayRole:
             if orientation == Qt.Horizontal:
                 return self._data.columns[section]
-            elif orientation == Qt.Vertical:
+            if orientation == Qt.Vertical:
                 return section
         return None
 
     def update(self, data):
         self._data = data
+
+    def flags(self, index: QModelIndex):
+        flag = super().flags(index)
+        if index.column() > 0:
+            flag |= Qt.ItemIsEditable
+        return flag
+
+    def setData(self, index: QModelIndex, value, role):
+        """Set data at given index"""
+        if not index.isValid():
+            return False
+
+        if self._data is None:
+            return False
+
+        if role == Qt.EditRole:
+            if index.column() == 0:
+                raise "First column of dataset is not editable"
+            if index.column() == 1:
+                self._data.iloc[index.row()][index.column()] = value
+                self.dataChanged.emit(index, index, role)
+            if index.column() == 2:
+                self._data.iloc[index.row()][index.column()] = QRectF2Box(
+                    value)
+                self.dataChanged.emit(index, index, role)
+                return True
+        return False

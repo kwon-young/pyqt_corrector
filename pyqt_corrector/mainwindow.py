@@ -10,12 +10,12 @@ import glob
 import pandas as pd
 
 from PySide2.QtWidgets import QMainWindow, QFileDialog, QApplication, QWidget, QGridLayout, QTableView, QLabel
-from PySide2.QtCore import QFile, Signal, Slot, QModelIndex
+from PySide2.QtCore import QFile, Signal, Slot, QModelIndex, Qt
 from PySide2.QtUiTools import QUiLoader
 
 from pyqt_corrector.mainwindow_ui import Ui_MainWindow
 from pyqt_corrector.models import TableModel
-from pyqt_corrector.widgets import ImageViewer
+from pyqt_corrector.widgets import ImageViewer, LabelComboBox
 
 
 class MainWindow(QMainWindow):
@@ -39,10 +39,18 @@ class MainWindow(QMainWindow):
         self.coordLabel = QLabel()
         self.ui.statusbar.addWidget(self.coordLabel)
 
+        self.comboBox = LabelComboBox(self.ui.scrollAreaWidgetContents)
+        self.comboBox.setEditable(True)
+        self.comboBox.setObjectName("comboBox")
+        self.ui.gridLayout.addWidget(self.comboBox, 0, 0, 1, 1)
+
         self.imageViewer = ImageViewer(self.ui.scrollAreaWidgetContents)
-        self.ui.gridLayout.addWidget(self.imageViewer.view, 0, 0, 1, 1)
+        self.ui.gridLayout.addWidget(self.imageViewer.view, 1, 0, 1, 1)
         self.imageViewer.message.connect(self.messageLabel.setText)
         self.imageViewer.view.mouseMoved.connect(self.coordLabel.setText)
+        self.imageViewer.signalHandler.boxPressed.connect(self.messageLabel.setText)
+        self.imageViewer.signalHandler.boxPressed.connect(self.selectRowColumn)
+        self.imageViewer.signalHandler.boxChanged.connect(self.changeBox)
 
         self.tabs = []
         self.gridLayouts_1 = []
@@ -65,7 +73,7 @@ class MainWindow(QMainWindow):
         self.directory = QFileDialog.getExistingDirectory(
             self,
             QApplication.translate("MainWindow", "Open directory", None, -1),
-            "/home/kwon-young/Documents/choi_dataset")
+            "/home/kwon-young/Documents/PartageVirtualBox/data/omr_dataset/choi_dataset")
         self.imageViewer.directory = self.directory
         self.changedDirectory.emit()
 
@@ -73,6 +81,7 @@ class MainWindow(QMainWindow):
     def readData(self):
         """Read csv data into pandas DataFrame"""
         dataset_files = glob.glob(os.path.join(self.directory, "*.csv"))
+        labels = set()
         if not dataset_files:
             self.messageLabel.setText(
                 f"No .csv files found in {self.directory}")
@@ -87,6 +96,13 @@ class MainWindow(QMainWindow):
                     break
             else:
                 self.datasets[name] = dataset
+            labels |= set(dataset["label"].unique())
+        existingLabels = [self.comboBox.itemText(i)
+                          for i in range(self.comboBox.count())]
+        for label in labels:
+            if label not in existingLabels:
+                self.comboBox.addItem(label)
+
         self.datasetsChanged.emit()
 
     @Slot()
@@ -165,3 +181,16 @@ class MainWindow(QMainWindow):
         del self.gridLayouts_1[tab_index]
         del self.gridLayouts_2[tab_index]
         del self.tabs[tab_index]
+
+    @Slot()
+    def selectRowColumn(self, name, row):
+        index = self.tableNames.index(name)
+        self.ui.tabWidget.setCurrentIndex(index)
+        self.tableViews[index].selectRow(row)
+
+    @Slot()
+    def changeBox(self, name, row, box):
+        index = self.tableNames.index(name)
+        model = self.tableModels[index]
+        indexModel = model.index(row, 2)
+        model.setData(indexModel, box, Qt.EditRole)
