@@ -96,12 +96,10 @@ class MainWindow(QMainWindow):
                 self.updateTab(i, name, dataset)
             else:
                 self.createTab(name, dataset)
+            self.tableViews[i].activated.connect(
+                self.imageViewer.update)
         for i in range(len(self.datasets), numTabs):
             self.deleteTab(i)
-        if self.ui.tabWidget.count() > 0:
-            tab_index = self.ui.tabWidget.currentIndex()
-            self.tableViews[tab_index].activated.connect(
-                self.imageViewer.update)
 
     def createTab(self, name, dataset):
         """Create a tab for dataset"""
