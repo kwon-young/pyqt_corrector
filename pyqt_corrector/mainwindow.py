@@ -41,7 +41,7 @@ class MainWindow(QMainWindow):
 
         self.imageViewer = ImageViewer(self.ui.scrollAreaWidgetContents)
         self.ui.gridLayout.addWidget(self.imageViewer.view, 0, 0, 1, 1)
-        self.imageViewer.imageNotFound.connect(self.messageLabel.setText)
+        self.imageViewer.message.connect(self.messageLabel.setText)
         self.imageViewer.view.mouseMoved.connect(self.coordLabel.setText)
 
         self.tabs = []
@@ -49,6 +49,7 @@ class MainWindow(QMainWindow):
         self.gridLayouts_2 = []
         self.tableViews = []
         self.tableModels = []
+        self.tableNames = []
 
         self.directory = None
         self.changedDirectory.connect(self.readData)
@@ -100,6 +101,8 @@ class MainWindow(QMainWindow):
                 self.imageViewer.update)
         for i in range(len(self.datasets), numTabs):
             self.deleteTab(i)
+        self.imageViewer.dataModels = self.tableModels
+        self.imageViewer.dataNames = self.tableNames
 
     def createTab(self, name, dataset):
         """Create a tab for dataset"""
@@ -126,6 +129,8 @@ class MainWindow(QMainWindow):
         tableModel.update(dataset)
         self.tableModels.append(tableModel)
 
+        self.tableNames.append(name)
+
         tableView.setModel(tableModel)
         gridLayout_1.addWidget(tableView, 0, 0, 1, 1)
         gridLayout_2.addLayout(gridLayout_1, 0, 0, 1, 1)
@@ -134,6 +139,7 @@ class MainWindow(QMainWindow):
         self.ui.tabWidget.setTabText(
             self.ui.tabWidget.indexOf(tab),
             QApplication.translate("MainWindow", name, None, -1))
+        tableView.resizeColumnsToContents()
 
     def updateTab(self, tab_index, name, dataset):
         """Update existing Tab"""
@@ -143,6 +149,7 @@ class MainWindow(QMainWindow):
         self.tableModels[tab_index] = tableModel
 
         self.tableViews[tab_index].setModel(tableModel)
+        self.tableNames[tab_index] = name
 
         self.ui.tabWidget.setTabText(
             tab_index, QApplication.translate("MainWindow", name, None, -1))
@@ -152,6 +159,7 @@ class MainWindow(QMainWindow):
         self.tableViews[tab_index].activated.disconnect(
             self.imageViewer.update)
         self.ui.tabWidget.removeTab(tab_index)
+        del self.tableNames[tab_index]
         del self.tableModels[tab_index]
         del self.tableViews[tab_index]
         del self.gridLayouts_1[tab_index]

@@ -2,7 +2,7 @@ import os
 import glob
 from itertools import zip_longest
 import seaborn
-from PySide2.QtWidgets import QWidget, QGraphicsScene, QGraphicsView, QGraphicsRectItem, QStyleOptionGraphicsItem, QCommonStyle, QStyle, QGraphicsSceneHoverEvent, QGraphicsItem, QGraphicsSceneMouseEvent
+from PySide2.QtWidgets import QWidget, QGraphicsScene, QGraphicsView, QGraphicsRectItem, QStyleOptionGraphicsItem, QCommonStyle, QStyle, QGraphicsSceneHoverEvent, QGraphicsItem, QGraphicsSceneMouseEvent, QGraphicsPixmapItem
 from PySide2.QtCore import Slot, Signal, QModelIndex, Qt, QTimeLine, QPointF, QRect, QMarginsF, QRectF, QSizeF
 from PySide2.QtGui import QPixmap, QWheelEvent, QKeyEvent, QMouseEvent, QResizeEvent, QPainter, QPainterPath, QColor, QPen
 from pyqt_corrector.models import TableModel
@@ -87,7 +87,7 @@ class ColorRect(QGraphicsRectItem):
 
     def paint(self, painter: QPainter, option: QStyleOptionGraphicsItem,
               widget: QWidget):
-        painter.setPen(QPen(self.color))
+        painter.setPen(QPen(self.color, 3))
         painter.drawRect(self.rect())
 
 
@@ -243,7 +243,7 @@ class ImageViewer(QWidget):
 
     """View an image and multiple annotated boxes"""
 
-    imageNotFound = Signal(str)
+    message = Signal(str)
 
     def __init__(self, parent):
         """Constructor
@@ -260,53 +260,83 @@ class ImageViewer(QWidget):
 
         self.directory = None
         self.page = None
-        self.graphicsPixmapItem = None
-        self.resizableRects = []
+        self.graphicsPixmapItem = QGraphicsPixmapItem()
+        self.scene.addItem(self.graphicsPixmapItem)
+        self.perModelResizableRects = {}
+        self.dataModels = []
+        self._dataNames = []
+        self.tableDatas = []
+
+    @property
+    def dataNames(self):
+        return self._dataNames
+
+    @dataNames.setter
+    def dataNames(self, dataNames):
+        self._dataNames = dataNames
+        self.perModelResizableRects = {name: [] for name in dataNames}
 
     @Slot()
     def update(self, index: QModelIndex):
         """Update image and bounding boxes from new index"""
-        data: TableModel = index.model()
-        tableData = data.data(index, Qt.UserRole)
-        page = tableData["page"][index.row()]
-        if self.page != page:
+        page = index.model().pageAtIndex(index)
+
+        if page != self.page:
+            self.page = page
             path = os.path.join(self.directory, f"*{page}*")
             names = glob.glob(path)
             if not names:
-                self.imageNotFound.emit(f"no image found in {path}")
+                self.message.emit(f"no image found in {path}")
                 return
-            if self.graphicsPixmapItem is not None:
-                self.scene.removeItem(self.graphicsPixmapItem)
+            self.message.emit(f"loading {os.path.basename(names[0])}")
             pixmap = QPixmap(names[0])
-            self.graphicsPixmapItem = self.scene.addPixmap(pixmap)
+            self.graphicsPixmapItem.setPixmap(pixmap)
 
-            labels = tableData["label"].unique()
-            labels.sort()
-            color_map = {label: QColor(*[int(c * 255) for c in color])
-                         for label, color in zip(labels, seaborn.color_palette(
-                             None, len(labels)))}
+            self.tableDatas = [model.pageData(page) for model in self.dataModels]
 
-            self.drawBoxes(tableData, color_map)
+        labels = set().union(*[tableData["label"]
+                               for tableData in self.tableDatas])
+        # we use one color per class + one color per not visible tab dataset
+        num_colors = len(labels) + len(self.dataModels) - 1
+        colors = [QColor(*[int(c * 255) for c in color])
+                  for color in seaborn.color_palette(None, num_colors)]
+        for i, tableData in enumerate(self.tableDatas):
+            curModelIndex = self.dataModels.index(index.model())
+            if curModelIndex == i:
+                color_map = {label: color
+                             for label, color in zip(labels, colors)}
+            else:
+                num_colors -= 1
+                color = colors[num_colors]
+                color_map = {label: color for label in labels}
 
-        boundingRect = tableData["box"][index.row()]
+            self.drawBoxes(self._dataNames[i], tableData, color_map)
+
+        boundingRect = index.model().boxAtIndex(index)
         margin_size = min(boundingRect.width(), boundingRect.height()) / 2
         margin = QMarginsF(*([margin_size] * 4))
         self.view.fitInView(boundingRect + margin, Qt.KeepAspectRatio)
         self.view.setFocus()
 
-    def drawBoxes(self, data, color_map):
-        newRubberBands = []
-        for rowData, resizableRect in zip_longest(
-                data.values, self.resizableRects):
-            if rowData is None:
-                # means there are more resizableRects than boxes to draw
-                self.scene.removeItem(resizableRect)
-                continue
-            if resizableRect is None:
+    def drawBoxes(self, name, data, color_map):
+        """draw boxes on top of an image
+        This function tries to reuse existing ResizableRect to draw newly given
+        boxes. It will dynamically add more boxes and remove unused ones.
+        """
+        for i, rowData in enumerate(data.values):
+            if i >= len(self.perModelResizableRects[name]):
                 # means there are more boxes to draw than resizableRects
-                resizableRect = ResizableRect(self.graphicsPixmapItem)
-                newRubberBands.append(resizableRect)
-            page, label, box = rowData
+                resizableRect = ResizableRect()
+                self.perModelResizableRects[name].append(resizableRect)
+                self.scene.addItem(resizableRect)
+            else:
+                resizableRect = self.perModelResizableRects[name][i]
+            _page, label, box = rowData
             resizableRect.setRect(box)
             resizableRect.setColor(color_map[label])
-            resizableRect.setToolTip(label)
+            resizableRect.setToolTip(f"{name}: {label}")
+        # start by removing extraneous resizableBoxes
+        for box in self.perModelResizableRects[name][len(data.values):]:
+            self.scene.removeItem(box)
+        self.perModelResizableRects[name] = self.perModelResizableRects[name][
+            :len(data.values)]

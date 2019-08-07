@@ -61,11 +61,37 @@ class TableModel(QAbstractTableModel):
         if role == Qt.DisplayRole:
             return self._data.iloc[index.row()][index.column()]
         if role == Qt.UserRole:
-            page = self._data.iloc[index.row()][0]
+            page = self._data["page"][index.row()]
             tableData = self._data.query(f"page == '{page}'").copy()
             tableData["box"] = tableData["box"].apply(box2QRect)
             return tableData
         return None
+
+    def pageAtIndex(self, index: QModelIndex):
+        if not index.isValid():
+            return None
+
+        if self._data is None:
+            return None
+
+        return self._data["page"][index.row()]
+
+    def boxAtIndex(self, index: QModelIndex):
+        if not index.isValid():
+            return None
+
+        if self._data is None:
+            return None
+
+        return box2QRect(self._data["box"][index.row()])
+
+    def pageData(self, page):
+        if self._data is None:
+            return None
+        tableData = self._data.query(f"page == '{page}'").copy()
+        tableData["box"] = tableData["box"].apply(box2QRect)
+        return tableData
+
 
     def headerData(self, section, orientation, role):
         """Get header at given section"""
