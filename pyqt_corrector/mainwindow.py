@@ -149,7 +149,11 @@ class MainWindow(QMainWindow):
         return
 
     def deleteTab(self, tab_index):
-        if self.ui.tabWidget.currentIndex() == tab_index:
-            self.tableViews[tab_index].activated.disconnect(
-                self.imageViewer.update)
+        self.tableViews[tab_index].activated.disconnect(
+            self.imageViewer.update)
         self.ui.tabWidget.removeTab(tab_index)
+        del self.tableModels[tab_index]
+        del self.tableViews[tab_index]
+        del self.gridLayouts_1[tab_index]
+        del self.gridLayouts_2[tab_index]
+        del self.tabs[tab_index]
