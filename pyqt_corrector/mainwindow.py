@@ -72,11 +72,20 @@ class MainWindow(QMainWindow):
     def readData(self):
         """Read csv data into pandas DataFrame"""
         dataset_files = glob.glob(os.path.join(self.directory, "*.csv"))
-        self.datasets = {
-            name: pd.read_csv(
+        if not dataset_files:
+            self.messageLabel.setText(
+                f"No .csv files found in {self.directory}")
+        for name in dataset_files:
+            dataset = pd.read_csv(
                 name, header=0, skipinitialspace=True, skip_blank_lines=True,
                 comment="#")
-            for name in dataset_files}
+            for col in ["page", "label", "box"]:
+                if col not in dataset:
+                    self.messageLabel.setText(
+                        f"{name} does not have column {col}")
+                    break
+            else:
+                self.datasets[name] = dataset
         self.datasetsChanged.emit()
 
     @Slot()
