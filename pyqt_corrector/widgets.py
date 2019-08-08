@@ -97,6 +97,7 @@ class ColorRect(QGraphicsRectItem):
 
     def setColor(self, color):
         self.color = color
+        self.update(self.boundingRect())
 
     def paint(self, painter: QPainter, option: QStyleOptionGraphicsItem,
               widget: QWidget):
@@ -189,9 +190,9 @@ class ResizableRect(ColorRect):
             handle.setVisible(state)
 
     def setColor(self, color):
-        self.color = color
         for handle in self.handles:
             handle.setColor(color)
+        super().setColor(color)
 
     def hoverEnterEvent(self, event: QGraphicsSceneHoverEvent):
         self.setHandlesVisible(True)
@@ -299,6 +300,8 @@ class ImageViewer(QWidget):
         self.tableDatas = []
         self.comboBox: LabelComboBox = comboBox
         self.comboBox.currentTextChanged.connect(self.transmitRowLabel)
+        self.curRect = None
+        self.color_map = None
 
     @property
     def dataNames(self):
@@ -333,17 +336,17 @@ class ImageViewer(QWidget):
 
         self.tableDatas = [model.pageData(page) for model in self.dataModels]
 
-        labels = set().union(*[tableData["label"]
-                               for tableData in self.tableDatas])
+        labels = set().union(*[model.labelSet for model in self.dataModels])
         # we use one color per class + one color per not visible tab dataset
         num_colors = len(labels) + len(self.dataModels) - 1
         colors = [QColor(*[int(c * 255) for c in color])
                   for color in seaborn.color_palette(None, num_colors)]
+        curModelIndex = self.dataModels.index(index.model())
         for i, tableData in enumerate(self.tableDatas):
-            curModelIndex = self.dataModels.index(index.model())
             if curModelIndex == i:
                 color_map = {label: color
                              for label, color in zip(labels, colors)}
+                self.color_map = color_map.copy()
             else:
                 num_colors -= 1
                 color = colors[num_colors]
@@ -351,13 +354,16 @@ class ImageViewer(QWidget):
 
             self.drawBoxes(self._dataNames[i], tableData, color_map)
 
-        boundingRect = index.model().boxAtIndex(index)
-        margin_size = min(boundingRect.width(), boundingRect.height()) / 2
-        margin = QMarginsF(*([margin_size] * 4))
         label = index.model().labelAtIndex(index)
         self.comboBox.setCurrentText(label)
         self.comboBox.row = index.row()
-        self.view.fitInView(boundingRect + margin, Qt.KeepAspectRatio)
+        loc = self.tableDatas[curModelIndex].index.get_loc(index.row())
+        self.curRect = self.perModelResizableRects[self._dataNames[curModelIndex]][loc]
+        boundingRect = self.curRect.boundingRect()
+        margin_size = min(boundingRect.width(), boundingRect.height()) / 2
+        margin = QMarginsF(*([margin_size] * 4))
+        viewRect = boundingRect + margin
+        self.view.fitInView(viewRect, Qt.KeepAspectRatio)
         self.view.setFocus()
 
     def drawBoxes(self, name, data, color_map):

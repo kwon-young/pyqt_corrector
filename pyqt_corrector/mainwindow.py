@@ -202,8 +202,10 @@ class MainWindow(QMainWindow):
     @Slot()
     def setSelectedItemLabel(self, row, label):
         index = self.ui.tabWidget.currentIndex()
-        print(index)
         if index >= 0:
             model: TableModel = self.tableModels[index]
             index = model.index(row, 1)
             model.setData(index, label, Qt.EditRole)
+            if self.imageViewer.curRect is not None and self.imageViewer.color_map is not None:
+                self.imageViewer.curRect.setColor(
+                    self.imageViewer.color_map[label])

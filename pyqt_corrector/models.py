@@ -36,6 +36,7 @@ class TableModel(QAbstractTableModel):
 
         self._parent = parent
         self._data = None
+        self.labelSet = set()
 
     def rowCount(self, parent: QModelIndex):
         """Get the number of rows"""
@@ -121,6 +122,7 @@ class TableModel(QAbstractTableModel):
 
     def update(self, data):
         self._data = data
+        self.labelSet = set(self._data["label"].unique())
 
     def flags(self, index: QModelIndex):
         flag = super().flags(index)
