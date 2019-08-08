@@ -90,6 +90,16 @@ class TableModel(QAbstractTableModel):
 
         return box2QRect(self._data["box"][index.row()])
 
+    def labelAtIndex(self, index: QModelIndex):
+        if not index.isValid():
+            return None
+
+        if self._data is None:
+            return None
+
+        return self._data["label"][index.row()]
+
+
     def pageData(self, page):
         if self._data is None:
             return None

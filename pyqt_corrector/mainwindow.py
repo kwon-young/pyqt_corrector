@@ -44,13 +44,17 @@ class MainWindow(QMainWindow):
         self.comboBox.setObjectName("comboBox")
         self.ui.gridLayout.addWidget(self.comboBox, 0, 0, 1, 1)
 
-        self.imageViewer = ImageViewer(self.ui.scrollAreaWidgetContents)
+        self.imageViewer = ImageViewer(
+            self.comboBox, self.ui.scrollAreaWidgetContents)
         self.ui.gridLayout.addWidget(self.imageViewer.view, 1, 0, 1, 1)
         self.imageViewer.message.connect(self.messageLabel.setText)
         self.imageViewer.view.mouseMoved.connect(self.coordLabel.setText)
-        self.imageViewer.signalHandler.boxPressed.connect(self.messageLabel.setText)
+        self.imageViewer.signalHandler.boxPressed.connect(
+            self.messageLabel.setText)
         self.imageViewer.signalHandler.boxPressed.connect(self.selectRowColumn)
         self.imageViewer.signalHandler.boxChanged.connect(self.changeBox)
+        self.imageViewer.LabelComboBoxChanged.connect(
+            self.setSelectedItemLabel)
 
         self.tabs = []
         self.gridLayouts_1 = []
@@ -73,7 +77,7 @@ class MainWindow(QMainWindow):
         self.directory = QFileDialog.getExistingDirectory(
             self,
             QApplication.translate("MainWindow", "Open directory", None, -1),
-            "/home/kwon-young/Documents/PartageVirtualBox/data/omr_dataset/choi_dataset")
+            "/home/kwon-young/Documents/choi_dataset")
         self.imageViewer.directory = self.directory
         self.changedDirectory.emit()
 
@@ -114,7 +118,7 @@ class MainWindow(QMainWindow):
             else:
                 self.createTab(name, dataset)
             self.tableViews[i].activated.connect(
-                self.imageViewer.update)
+                self.imageViewer.updateSelect)
         for i in range(len(self.datasets), numTabs):
             self.deleteTab(i)
         self.imageViewer.dataModels = self.tableModels
@@ -194,3 +198,12 @@ class MainWindow(QMainWindow):
         model = self.tableModels[index]
         indexModel = model.index(row, 2)
         model.setData(indexModel, box, Qt.EditRole)
+
+    @Slot()
+    def setSelectedItemLabel(self, row, label):
+        index = self.ui.tabWidget.currentIndex()
+        print(index)
+        if index >= 0:
+            model: TableModel = self.tableModels[index]
+            index = model.index(row, 1)
+            model.setData(index, label, Qt.EditRole)

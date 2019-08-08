@@ -17,6 +17,7 @@ class LabelComboBox(QComboBox):
 
         """
         super().__init__(parent)
+        self.row = -1
 
 
 class SmoothView(QGraphicsView):
@@ -272,8 +273,9 @@ class ImageViewer(QWidget):
     """View an image and multiple annotated boxes"""
 
     message = Signal(str)
+    LabelComboBoxChanged = Signal(int, str)
 
-    def __init__(self, parent):
+    def __init__(self, comboBox, parent):
         """Constructor
 
         :parent: TODO
@@ -295,6 +297,8 @@ class ImageViewer(QWidget):
         self.dataModels = []
         self._dataNames = []
         self.tableDatas = []
+        self.comboBox: LabelComboBox = comboBox
+        self.comboBox.currentTextChanged.connect(self.transmitRowLabel)
 
     @property
     def dataNames(self):
@@ -306,7 +310,13 @@ class ImageViewer(QWidget):
         self.perModelResizableRects = {name: [] for name in dataNames}
 
     @Slot()
-    def update(self, index: QModelIndex):
+    def updateData(self, topLeft: QModelIndex, bottomRight: QModelIndex,
+                   roles):
+        self.updateSelect(topLeft)
+        # TODO: update corresponding rect color
+
+    @Slot()
+    def updateSelect(self, index: QModelIndex):
         """Update image and bounding boxes from new index"""
         page = index.model().pageAtIndex(index)
 
@@ -321,7 +331,7 @@ class ImageViewer(QWidget):
             pixmap = QPixmap(names[0])
             self.graphicsPixmapItem.setPixmap(pixmap)
 
-            self.tableDatas = [model.pageData(page) for model in self.dataModels]
+        self.tableDatas = [model.pageData(page) for model in self.dataModels]
 
         labels = set().union(*[tableData["label"]
                                for tableData in self.tableDatas])
@@ -344,6 +354,9 @@ class ImageViewer(QWidget):
         boundingRect = index.model().boxAtIndex(index)
         margin_size = min(boundingRect.width(), boundingRect.height()) / 2
         margin = QMarginsF(*([margin_size] * 4))
+        label = index.model().labelAtIndex(index)
+        self.comboBox.setCurrentText(label)
+        self.comboBox.row = index.row()
         self.view.fitInView(boundingRect + margin, Qt.KeepAspectRatio)
         self.view.setFocus()
 
@@ -370,3 +383,8 @@ class ImageViewer(QWidget):
             self.scene.removeItem(box)
         self.perModelResizableRects[name] = self.perModelResizableRects[name][
             :len(data.values)]
+
+    @Slot()
+    def transmitRowLabel(self, label):
+        row = self.comboBox.row
+        self.LabelComboBoxChanged.emit(row, label)
