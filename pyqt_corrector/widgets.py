@@ -299,7 +299,7 @@ class ImageViewer(QWidget):
         self._dataNames = []
         self.tableDatas = []
         self.comboBox: LabelComboBox = comboBox
-        self.comboBox.currentTextChanged.connect(self.transmitRowLabel)
+        self.comboBox.activated.connect(self.transmitRowLabel)
         self.curRect = None
         self.color_map = None
 
@@ -391,6 +391,7 @@ class ImageViewer(QWidget):
             :len(data.values)]
 
     @Slot()
-    def transmitRowLabel(self, label):
+    def transmitRowLabel(self, index: int):
         row = self.comboBox.row
+        label = self.comboBox.itemText(index)
         self.LabelComboBoxChanged.emit(row, label)

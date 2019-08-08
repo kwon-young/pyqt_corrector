@@ -12,6 +12,7 @@ import pandas as pd
 from PySide2.QtWidgets import QMainWindow, QFileDialog, QApplication, QWidget, QGridLayout, QTableView, QLabel
 from PySide2.QtCore import QFile, Signal, Slot, QModelIndex, Qt
 from PySide2.QtUiTools import QUiLoader
+from PySide2.QtGui import QIcon
 
 from pyqt_corrector.mainwindow_ui import Ui_MainWindow
 from pyqt_corrector.models import TableModel
@@ -42,11 +43,11 @@ class MainWindow(QMainWindow):
         self.comboBox = LabelComboBox(self.ui.scrollAreaWidgetContents)
         self.comboBox.setEditable(True)
         self.comboBox.setObjectName("comboBox")
-        self.ui.gridLayout.addWidget(self.comboBox, 0, 0, 1, 1)
+        self.ui.gridLayout_2.addWidget(self.comboBox, 0, 0, 1, 1)
 
         self.imageViewer = ImageViewer(
             self.comboBox, self.ui.scrollAreaWidgetContents)
-        self.ui.gridLayout.addWidget(self.imageViewer.view, 1, 0, 1, 1)
+        self.ui.gridLayout_2.addWidget(self.imageViewer.view, 1, 0, 1, 1)
         self.imageViewer.message.connect(self.messageLabel.setText)
         self.imageViewer.view.mouseMoved.connect(self.coordLabel.setText)
         self.imageViewer.signalHandler.boxPressed.connect(
@@ -56,6 +57,12 @@ class MainWindow(QMainWindow):
         self.imageViewer.LabelComboBoxChanged.connect(
             self.setSelectedItemLabel)
 
+        self.leftIcon = QIcon().fromTheme("go-previous")
+        self.ui.leftPushButton.setIcon(self.leftIcon)
+        self.ui.leftPushButton.clicked.connect(self.moveRowToPrevious)
+        self.rightIcon = QIcon().fromTheme("go-next")
+        self.ui.rightPushButton.setIcon(self.rightIcon)
+        self.ui.rightPushButton.clicked.connect(self.moveRowToNext)
         self.tabs = []
         self.gridLayouts_1 = []
         self.gridLayouts_2 = []
@@ -190,7 +197,11 @@ class MainWindow(QMainWindow):
     def selectRowColumn(self, name, row):
         index = self.tableNames.index(name)
         self.ui.tabWidget.setCurrentIndex(index)
-        self.tableViews[index].selectRow(row)
+        modelIndex = self.tableModels[index].index(row, 2)
+        self.tableViews[index].setCurrentIndex(modelIndex)
+        label = self.tableModels[index].labelAtIndex(modelIndex)
+        self.comboBox.setCurrentText(label)
+        self.comboBox.row = row
 
     @Slot()
     def changeBox(self, name, row, box):
@@ -201,12 +212,43 @@ class MainWindow(QMainWindow):
 
     @Slot()
     def setSelectedItemLabel(self, row, label):
-        index = self.ui.tabWidget.currentIndex()
-        if index >= 0:
-            model: TableModel = self.tableModels[index]
+        tabIndex = self.ui.tabWidget.currentIndex()
+        if tabIndex >= 0:
+            model: TableModel = self.tableModels[tabIndex]
             index = model.index(row, 1)
             model.setData(index, label, Qt.EditRole)
             rect: ResizableRect = self.imageViewer.curRect
             if rect is not None and self.imageViewer.color_map is not None:
                 rect.setColor(self.imageViewer.color_map[label])
-                rect.setToolTip(f"{rect.data(0)}: {label}")
+                name = self.tableNames[tabIndex]
+                rect.setToolTip(f"{name}: {label}")
+                rect.setData(0, name)
+                rect.setData(1, row)
+
+    @Slot()
+    def moveRowToNext(self, checked):
+        numTab = self.ui.tabWidget.count()
+        if numTab > 0:
+            tabIndex = self.ui.tabWidget.currentIndex()
+            model: TableModel = self.tableModels[tabIndex]
+            nextModel: TableModel = self.tableModels[(tabIndex + 1) % numTab]
+            view: QTableView = self.tableViews[tabIndex]
+            modelIndex: QModelIndex = view.currentIndex()
+            currentRow = modelIndex.row()
+            rowData = model.rowAtIndex(currentRow)
+            model.deleteRow(currentRow)
+            nextModel.appendRow(rowData)
+
+    @Slot()
+    def moveRowToPrevious(self, checked):
+        numTab = self.ui.tabWidget.count()
+        if numTab > 0:
+            tabIndex = self.ui.tabWidget.currentIndex()
+            model: TableModel = self.tableModels[tabIndex]
+            nextModel: TableModel = self.tableModels[(tabIndex - 1) % numTab]
+            view: QTableView = self.tableViews[tabIndex]
+            modelIndex: QModelIndex = view.currentIndex()
+            currentRow = modelIndex.row()
+            rowData = model.rowAtIndex(currentRow)
+            model.deleteRow(currentRow)
+            nextModel.appendRow(rowData)

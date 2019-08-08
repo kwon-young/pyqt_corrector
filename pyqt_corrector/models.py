@@ -6,6 +6,7 @@ Date: 2019-08-05
 Description: Implement qt data models.
 """
 
+import pandas as pd
 from PySide2.QtCore import QModelIndex, QAbstractTableModel, Qt, QRectF, QRect
 
 
@@ -72,6 +73,15 @@ class TableModel(QAbstractTableModel):
             tableData["box"] = tableData["box"].apply(box2QRect)
             return tableData
         return None
+
+    def rowAtIndex(self, row):
+        if not row >= 0:
+            return None
+
+        if self._data is None:
+            return None
+
+        return self._data.iloc[row]
 
     def pageAtIndex(self, index: QModelIndex):
         if not index.isValid():
@@ -150,3 +160,28 @@ class TableModel(QAbstractTableModel):
                 self.dataChanged.emit(index, index, role)
                 return True
         return False
+
+    def appendRow(self, rowData):
+        if self._data is None:
+            return False
+
+        self._data = self._data.append(rowData, ignore_index=True)
+        self._data = self._data.reset_index(drop=True)
+        topLeft = self.index(self.rowCount(QModelIndex()), 0)
+        bottomRight = self.index(self.rowCount(QModelIndex()),
+                                 self.columnCount(QModelIndex()))
+        self.layoutChanged.emit()
+        self.dataChanged.emit(topLeft, bottomRight, Qt.EditRole)
+        return True
+
+    def deleteRow(self, row):
+        if self._data is None:
+            return False
+
+        self._data = self._data.drop(row)
+        self._data = self._data.reset_index(drop=True)
+        topLeft = self.index(row, 0)
+        bottomRight = self.index(row, self.columnCount(QModelIndex()))
+        self.layoutChanged.emit()
+        self.dataChanged.emit(topLeft, bottomRight, Qt.EditRole)
+        return True
