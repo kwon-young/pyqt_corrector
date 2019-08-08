@@ -3,7 +3,7 @@
 # Form implementation generated from reading ui file 'data/mainwindow.ui',
 # licensing of 'data/mainwindow.ui' applies.
 #
-# Created: Thu Aug  8 15:10:47 2019
+# Created: Thu Aug  8 16:49:57 2019
 #      by: pyside2-uic  running on PySide2 5.9.0~a1
 #
 # WARNING! All changes made in this file will be lost!
@@ -85,6 +85,8 @@ class Ui_MainWindow(object):
         self.menubar.setObjectName("menubar")
         self.menuFile = QtWidgets.QMenu(self.menubar)
         self.menuFile.setObjectName("menuFile")
+        self.menuTools = QtWidgets.QMenu(self.menubar)
+        self.menuTools.setObjectName("menuTools")
         MainWindow.setMenuBar(self.menubar)
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
         self.statusbar.setObjectName("statusbar")
@@ -98,12 +100,25 @@ class Ui_MainWindow(object):
         self.actionQuit.setObjectName("actionQuit")
         self.actionSave_Dataset = QtWidgets.QAction(MainWindow)
         self.actionSave_Dataset.setObjectName("actionSave_Dataset")
+        self.actionStopwatch_Start = QtWidgets.QAction(MainWindow)
+        self.actionStopwatch_Start.setObjectName("actionStopwatch_Start")
+        self.actionStopwatch_Stop = QtWidgets.QAction(MainWindow)
+        self.actionStopwatch_Stop.setObjectName("actionStopwatch_Stop")
+        self.actionStopwatch_Reset = QtWidgets.QAction(MainWindow)
+        self.actionStopwatch_Reset.setObjectName("actionStopwatch_Reset")
         self.menuFile.addAction(self.actionOpen_Directory)
         self.menuFile.addAction(self.actionSave_Dataset)
         self.menuFile.addAction(self.actionQuit)
+        self.menuTools.addAction(self.actionStopwatch_Start)
+        self.menuTools.addAction(self.actionStopwatch_Stop)
+        self.menuTools.addAction(self.actionStopwatch_Reset)
         self.menubar.addAction(self.menuFile.menuAction())
+        self.menubar.addAction(self.menuTools.menuAction())
         self.toolBar.addAction(self.actionOpen_Directory)
         self.toolBar.addAction(self.actionSave_Dataset)
+        self.toolBar.addAction(self.actionStopwatch_Start)
+        self.toolBar.addAction(self.actionStopwatch_Stop)
+        self.toolBar.addAction(self.actionStopwatch_Reset)
 
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
@@ -113,6 +128,7 @@ class Ui_MainWindow(object):
         self.leftPushButton.setText(QtWidgets.QApplication.translate("MainWindow", "Send to left tab", None, -1))
         self.rightPushButton.setText(QtWidgets.QApplication.translate("MainWindow", "Send to right tab", None, -1))
         self.menuFile.setTitle(QtWidgets.QApplication.translate("MainWindow", "File", None, -1))
+        self.menuTools.setTitle(QtWidgets.QApplication.translate("MainWindow", "Tools", None, -1))
         self.toolBar.setWindowTitle(QtWidgets.QApplication.translate("MainWindow", "toolBar", None, -1))
         self.actionOpen_Directory.setText(QtWidgets.QApplication.translate("MainWindow", "Open Directory", None, -1))
         self.actionOpen_Directory.setToolTip(QtWidgets.QApplication.translate("MainWindow", "Open Directory", None, -1))
@@ -121,6 +137,9 @@ class Ui_MainWindow(object):
         self.actionQuit.setShortcut(QtWidgets.QApplication.translate("MainWindow", "Ctrl+Q", None, -1))
         self.actionSave_Dataset.setText(QtWidgets.QApplication.translate("MainWindow", "Save Dataset", None, -1))
         self.actionSave_Dataset.setShortcut(QtWidgets.QApplication.translate("MainWindow", "Ctrl+S", None, -1))
+        self.actionStopwatch_Start.setText(QtWidgets.QApplication.translate("MainWindow", "Stopwatch Start", None, -1))
+        self.actionStopwatch_Stop.setText(QtWidgets.QApplication.translate("MainWindow", "Stopwatch Stop", None, -1))
+        self.actionStopwatch_Reset.setText(QtWidgets.QApplication.translate("MainWindow", "Stopwatch Reset", None, -1))
 
 
 if __name__ == "__main__":

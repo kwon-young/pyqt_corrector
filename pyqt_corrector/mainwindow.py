@@ -10,7 +10,7 @@ import glob
 import pandas as pd
 
 from PySide2.QtWidgets import QMainWindow, QFileDialog, QApplication, QWidget, QGridLayout, QTableView, QLabel
-from PySide2.QtCore import QFile, Signal, Slot, QModelIndex, Qt
+from PySide2.QtCore import QFile, Signal, Slot, QModelIndex, Qt, QTime, QTimer
 from PySide2.QtUiTools import QUiLoader
 from PySide2.QtGui import QIcon
 
@@ -44,6 +44,25 @@ class MainWindow(QMainWindow):
         self.ui.statusbar.addWidget(self.messageLabel)
         self.coordLabel = QLabel()
         self.ui.statusbar.addWidget(self.coordLabel)
+        self.stopwatchLabel = QLabel()
+        self.ui.statusbar.addWidget(self.stopwatchLabel)
+
+        self.time = QTime(0, 0)
+        self.stopwatch = QTimer()
+        self.stopwatch.setInterval(1000)
+        self.stopwatch.timeout.connect(self.updateStopWatchLabel)
+
+        self.stopwatchStartIcon = QIcon().fromTheme("chronometer-start")
+        self.ui.actionStopwatch_Start.setIcon(self.stopwatchStartIcon)
+        self.ui.actionStopwatch_Start.triggered.connect(self.startStopWatch)
+
+        self.stopwatchStopIcon = QIcon().fromTheme("chronometer-pause")
+        self.ui.actionStopwatch_Stop.setIcon(self.stopwatchStopIcon)
+        self.ui.actionStopwatch_Stop.triggered.connect(self.stopStopWatch)
+
+        self.stopwatchResetIcon = QIcon().fromTheme("chronometer-reset")
+        self.ui.actionStopwatch_Reset.setIcon(self.stopwatchResetIcon)
+        self.ui.actionStopwatch_Reset.triggered.connect(self.resetStopWatch)
 
         self.comboBox = LabelComboBox(self.ui.scrollAreaWidgetContents)
         self.comboBox.setEditable(True)
@@ -269,3 +288,22 @@ class MainWindow(QMainWindow):
         for name, model in zip(self.dataset_files, self.tableModels):
             model._data.to_csv(name + ".bak", index=False)
         return
+
+    @Slot()
+    def updateStopWatchLabel(self):
+        elapsed = QTime(0, 0).addMSecs(self.time.elapsed())
+        self.stopwatchLabel.setText(elapsed.toString())
+
+    @Slot()
+    def startStopWatch(self):
+        self.time.start()
+        self.stopwatch.start(1000)
+
+    @Slot()
+    def stopStopWatch(self):
+        self.stopwatch.stop()
+
+    @Slot()
+    def resetStopWatch(self):
+        self.time.start()
+        self.stopwatchLabel.setText(QTime(0, 0).toString())

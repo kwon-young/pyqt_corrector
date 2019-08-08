@@ -122,7 +122,16 @@
     <addaction name="actionSave_Dataset"/>
     <addaction name="actionQuit"/>
    </widget>
+   <widget class="QMenu" name="menuTools">
+    <property name="title">
+     <string>Tools</string>
+    </property>
+    <addaction name="actionStopwatch_Start"/>
+    <addaction name="actionStopwatch_Stop"/>
+    <addaction name="actionStopwatch_Reset"/>
+   </widget>
    <addaction name="menuFile"/>
+   <addaction name="menuTools"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <widget class="QToolBar" name="toolBar">
@@ -137,6 +146,9 @@
    </attribute>
    <addaction name="actionOpen_Directory"/>
    <addaction name="actionSave_Dataset"/>
+   <addaction name="actionStopwatch_Start"/>
+   <addaction name="actionStopwatch_Stop"/>
+   <addaction name="actionStopwatch_Reset"/>
   </widget>
   <action name="actionOpen_Directory">
    <property name="text">
@@ -163,6 +175,21 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+S</string>
+   </property>
+  </action>
+  <action name="actionStopwatch_Start">
+   <property name="text">
+    <string>Stopwatch Start</string>
+   </property>
+  </action>
+  <action name="actionStopwatch_Stop">
+   <property name="text">
+    <string>Stopwatch Stop</string>
+   </property>
+  </action>
+  <action name="actionStopwatch_Reset">
+   <property name="text">
+    <string>Stopwatch Reset</string>
    </property>
   </action>
  </widget>
