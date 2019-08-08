@@ -134,12 +134,6 @@ class TableModel(QAbstractTableModel):
         self._data = data
         self.labelSet = set(self._data["label"].unique())
 
-    def flags(self, index: QModelIndex):
-        flag = super().flags(index)
-        if index.column() > 0:
-            flag |= Qt.ItemIsEditable
-        return flag
-
     def setData(self, index: QModelIndex, value, role):
         """Set data at given index"""
         if not index.isValid():

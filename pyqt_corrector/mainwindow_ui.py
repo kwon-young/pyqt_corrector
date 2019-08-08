@@ -3,7 +3,7 @@
 # Form implementation generated from reading ui file 'data/mainwindow.ui',
 # licensing of 'data/mainwindow.ui' applies.
 #
-# Created: Thu Aug  8 11:50:25 2019
+# Created: Thu Aug  8 15:10:47 2019
 #      by: pyside2-uic  running on PySide2 5.9.0~a1
 #
 # WARNING! All changes made in this file will be lost!
@@ -92,27 +92,35 @@ class Ui_MainWindow(object):
         self.toolBar = QtWidgets.QToolBar(MainWindow)
         self.toolBar.setObjectName("toolBar")
         MainWindow.addToolBar(QtCore.Qt.TopToolBarArea, self.toolBar)
-        self.actionOpen_directory = QtWidgets.QAction(MainWindow)
-        self.actionOpen_directory.setObjectName("actionOpen_directory")
+        self.actionOpen_Directory = QtWidgets.QAction(MainWindow)
+        self.actionOpen_Directory.setObjectName("actionOpen_Directory")
         self.actionQuit = QtWidgets.QAction(MainWindow)
         self.actionQuit.setObjectName("actionQuit")
-        self.menuFile.addAction(self.actionOpen_directory)
+        self.actionSave_Dataset = QtWidgets.QAction(MainWindow)
+        self.actionSave_Dataset.setObjectName("actionSave_Dataset")
+        self.menuFile.addAction(self.actionOpen_Directory)
+        self.menuFile.addAction(self.actionSave_Dataset)
         self.menuFile.addAction(self.actionQuit)
         self.menubar.addAction(self.menuFile.menuAction())
-        self.toolBar.addAction(self.actionOpen_directory)
+        self.toolBar.addAction(self.actionOpen_Directory)
+        self.toolBar.addAction(self.actionSave_Dataset)
 
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
-        MainWindow.setWindowTitle(QtWidgets.QApplication.translate("MainWindow", "MainWindow", None, -1))
+        MainWindow.setWindowTitle(QtWidgets.QApplication.translate("MainWindow", "Corrector [*]", None, -1))
         self.leftPushButton.setText(QtWidgets.QApplication.translate("MainWindow", "Send to left tab", None, -1))
         self.rightPushButton.setText(QtWidgets.QApplication.translate("MainWindow", "Send to right tab", None, -1))
         self.menuFile.setTitle(QtWidgets.QApplication.translate("MainWindow", "File", None, -1))
         self.toolBar.setWindowTitle(QtWidgets.QApplication.translate("MainWindow", "toolBar", None, -1))
-        self.actionOpen_directory.setText(QtWidgets.QApplication.translate("MainWindow", "Open directory", None, -1))
-        self.actionOpen_directory.setShortcut(QtWidgets.QApplication.translate("MainWindow", "Ctrl+O", None, -1))
+        self.actionOpen_Directory.setText(QtWidgets.QApplication.translate("MainWindow", "Open Directory", None, -1))
+        self.actionOpen_Directory.setToolTip(QtWidgets.QApplication.translate("MainWindow", "Open Directory", None, -1))
+        self.actionOpen_Directory.setShortcut(QtWidgets.QApplication.translate("MainWindow", "Ctrl+O", None, -1))
         self.actionQuit.setText(QtWidgets.QApplication.translate("MainWindow", "Quit", None, -1))
+        self.actionQuit.setShortcut(QtWidgets.QApplication.translate("MainWindow", "Ctrl+Q", None, -1))
+        self.actionSave_Dataset.setText(QtWidgets.QApplication.translate("MainWindow", "Save Dataset", None, -1))
+        self.actionSave_Dataset.setShortcut(QtWidgets.QApplication.translate("MainWindow", "Ctrl+S", None, -1))
 
 
 if __name__ == "__main__":

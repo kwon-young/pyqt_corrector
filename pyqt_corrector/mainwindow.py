@@ -33,7 +33,12 @@ class MainWindow(QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
 
-        self.ui.actionOpen_directory.triggered.connect(self.openDirectory)
+        self.openIcon = QIcon().fromTheme("document-open")
+        self.ui.actionOpen_Directory.setIcon(self.openIcon)
+        self.ui.actionOpen_Directory.triggered.connect(self.openDirectory)
+        self.saveIcon = QIcon().fromTheme("document-save")
+        self.ui.actionSave_Dataset.setIcon(self.saveIcon)
+        self.ui.actionSave_Dataset.triggered.connect(self.saveDataToDisk)
 
         self.messageLabel = QLabel()
         self.ui.statusbar.addWidget(self.messageLabel)
@@ -70,9 +75,9 @@ class MainWindow(QMainWindow):
         self.tableModels = []
         self.tableNames = []
 
-        self.directory = None
         self.changedDirectory.connect(self.readData)
 
+        self.dataset_files = []
         self.datasets = {}
         self.datasetsChanged.connect(self.updateTabWidget)
 
@@ -81,22 +86,23 @@ class MainWindow(QMainWindow):
     @Slot()
     def openDirectory(self):
         """Open dataset directory"""
-        self.directory = QFileDialog.getExistingDirectory(
+        self.setWindowFilePath(QFileDialog.getExistingDirectory(
             self,
             QApplication.translate("MainWindow", "Open directory", None, -1),
-            "/home/kwon-young/Documents/choi_dataset")
-        self.imageViewer.directory = self.directory
+            "/home/kwon-young/Documents/PartageVirtualBox/data/omr_dataset/choi_dataset"))
+        self.setWindowTitle(f"Corrector {self.windowFilePath()} [*]")
+        self.imageViewer.directory = self.windowFilePath()
         self.changedDirectory.emit()
 
     @Slot()
     def readData(self):
         """Read csv data into pandas DataFrame"""
-        dataset_files = glob.glob(os.path.join(self.directory, "*.csv"))
+        self.dataset_files = glob.glob(os.path.join(self.windowFilePath(), "*.csv"))
         labels = set()
-        if not dataset_files:
+        if not self.dataset_files:
             self.messageLabel.setText(
-                f"No .csv files found in {self.directory}")
-        for name in dataset_files:
+                f"No .csv files found in {self.windowFilePath()}")
+        for name in self.dataset_files:
             dataset = pd.read_csv(
                 name, header=0, skipinitialspace=True, skip_blank_lines=True,
                 comment="#")
@@ -209,6 +215,7 @@ class MainWindow(QMainWindow):
         model = self.tableModels[index]
         indexModel = model.index(row, 2)
         model.setData(indexModel, box, Qt.EditRole)
+        self.setWindowModified(True)
 
     @Slot()
     def setSelectedItemLabel(self, row, label):
@@ -217,6 +224,7 @@ class MainWindow(QMainWindow):
             model: TableModel = self.tableModels[tabIndex]
             index = model.index(row, 1)
             model.setData(index, label, Qt.EditRole)
+            self.setWindowModified()
             rect: ResizableRect = self.imageViewer.curRect
             if rect is not None and self.imageViewer.color_map is not None:
                 rect.setColor(self.imageViewer.color_map[label])
@@ -238,6 +246,7 @@ class MainWindow(QMainWindow):
             rowData = model.rowAtIndex(currentRow)
             model.deleteRow(currentRow)
             nextModel.appendRow(rowData)
+            self.setWindowModified(True)
 
     @Slot()
     def moveRowToPrevious(self, checked):
@@ -252,3 +261,11 @@ class MainWindow(QMainWindow):
             rowData = model.rowAtIndex(currentRow)
             model.deleteRow(currentRow)
             nextModel.appendRow(rowData)
+            self.setWindowModified(True)
+
+    @Slot()
+    def saveDataToDisk(self):
+        self.setWindowModified(False)
+        for name, model in zip(self.dataset_files, self.tableModels):
+            model._data.to_csv(name + ".bak", index=False)
+        return

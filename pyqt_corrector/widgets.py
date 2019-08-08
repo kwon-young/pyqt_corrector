@@ -218,12 +218,14 @@ class ResizableRect(ColorRect):
             super().mouseReleaseEvent(event)
 
     def mouseMoveEvent(self, event: QGraphicsSceneMouseEvent):
-        if self.handleSelected is None:
-            super().mouseMoveEvent(event)
-            return
         box = self.rect()
         pos = event.pos()
-        if self.handleSelected == 0:
+        if self.handleSelected is None:
+            lastPos = event.lastPos()
+            offset = pos - lastPos
+            box.translate(offset)
+            new_box = box
+        elif self.handleSelected == 0:
             new_size = box.bottomRight() - pos
             width = max(new_size.x(), 0)
             height = max(new_size.y(), 0)
