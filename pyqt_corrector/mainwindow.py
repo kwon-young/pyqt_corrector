@@ -15,7 +15,7 @@ from PySide2.QtUiTools import QUiLoader
 
 from pyqt_corrector.mainwindow_ui import Ui_MainWindow
 from pyqt_corrector.models import TableModel
-from pyqt_corrector.widgets import ImageViewer, LabelComboBox
+from pyqt_corrector.widgets import ImageViewer, LabelComboBox, ResizableRect
 
 
 class MainWindow(QMainWindow):
@@ -206,6 +206,7 @@ class MainWindow(QMainWindow):
             model: TableModel = self.tableModels[index]
             index = model.index(row, 1)
             model.setData(index, label, Qt.EditRole)
-            if self.imageViewer.curRect is not None and self.imageViewer.color_map is not None:
-                self.imageViewer.curRect.setColor(
-                    self.imageViewer.color_map[label])
+            rect: ResizableRect = self.imageViewer.curRect
+            if rect is not None and self.imageViewer.color_map is not None:
+                rect.setColor(self.imageViewer.color_map[label])
+                rect.setToolTip(f"{rect.data(0)}: {label}")
