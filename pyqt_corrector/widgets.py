@@ -93,7 +93,7 @@ class ColorRect(QGraphicsRectItem):
         super().__init__(parent)
 
         self.color = None
-        self.penWidth = 2
+        self.penWidth = 1
 
     def setColor(self, color):
         self.color = color
@@ -101,7 +101,11 @@ class ColorRect(QGraphicsRectItem):
 
     def paint(self, painter: QPainter, option: QStyleOptionGraphicsItem,
               widget: QWidget):
-        painter.setPen(QPen(self.color, self.penWidth))
+        pen = QPen(self.color, self.penWidth)
+        if self.isSelected():
+            pen.setStyle(Qt.DashLine)
+        pen.setCosmetic(True)
+        painter.setPen(pen)
         painter.drawRect(self.rect())
 
     def boundingRect(self):
@@ -139,11 +143,10 @@ class ResizableRect(ColorRect):
         self.setVisible(True)
         self.setAcceptHoverEvents(True)
         self.setFiltersChildEvents(True)
-        self.setFlag(QGraphicsItem.ItemIsMovable)
+        self.setFlags(QGraphicsItem.ItemIsMovable | QGraphicsItem.ItemIsSelectable)
         self.setHandlesVisible(False)
-        for handle in self.handles:
-            handle.setAcceptHoverEvents(True)
         self.handleSelected = None
+        self.buttonDownRect = None
 
     def handleSize(self):
         box = self.rect()
@@ -202,30 +205,37 @@ class ResizableRect(ColorRect):
         self.setHandlesVisible(False)
         super().hoverLeaveEvent(event)
 
+    def mouseDoubleClickEvent(self, event):
+        zValue = self.zValue()
+        if zValue > 0:
+            self.setSelected(False)
+            self.setZValue(zValue - 1)
+        else:
+            self.setSelected(True)
+            self.setZValue(zValue + 1)
+
     def mousePressEvent(self, event: QGraphicsSceneMouseEvent):
         self.signalHandler.boxPressed.emit(self.data(0), self.data(1))
+        box = self.rect()
+        self.buttonDownRect = QRectF(self.rect())
         for i, handle in enumerate(self.handles):
-            if handle.isUnderMouse():
+            if handle.boundingRect().contains(event.pos()):
                 self.handleSelected = i
                 return
-
-        super().mousePressEvent(event)
 
     def mouseReleaseEvent(self, event: QGraphicsSceneMouseEvent):
         if self.handleSelected is not None:
             self.handleSelected = None
-        else:
-            super().mouseReleaseEvent(event)
 
     def mouseMoveEvent(self, event: QGraphicsSceneMouseEvent):
-        box = self.rect()
+        box = QRectF(self.buttonDownRect)
         pos = event.pos()
+        offset = pos - event.buttonDownPos(Qt.LeftButton)
         if self.handleSelected is None:
-            lastPos = event.lastPos()
-            offset = pos - lastPos
             box.translate(offset)
             new_box = box
         elif self.handleSelected == 0:
+            pos = box.topLeft() + offset
             new_size = box.bottomRight() - pos
             width = max(new_size.x(), 0)
             height = max(new_size.y(), 0)
@@ -233,41 +243,61 @@ class ResizableRect(ColorRect):
             top = min(pos.y(), box.bottom())
             new_box = QRectF(left, top, width, height)
         elif self.handleSelected == 1:
+            pos = box.topLeft() + offset
             height = max(box.bottom() - pos.y(), 0)
             top = min(pos.y(), box.bottom())
             new_box = QRectF(box.left(), top, box.width(), height)
         elif self.handleSelected == 2:
+            pos = box.topRight() + offset
             top = min(pos.y(), box.bottom())
             width = max(pos.x() - box.left(), 0)
             height = max(box.bottom() - pos.y(), 0)
             new_box = QRectF(box.left(), top, width, height)
         elif self.handleSelected == 3:
+            pos = box.topRight() + offset
             width = max(pos.x() - box.left(), 0)
             new_box = QRectF(box.left(), box.top(), width, box.height())
         elif self.handleSelected == 4:
+            pos = box.bottomRight() + offset
             new_size = pos - box.topLeft()
             width = max(new_size.x(), 0)
             height = max(new_size.y(), 0)
             new_box = QRectF(box.left(), box.top(), width, height)
         elif self.handleSelected == 5:
+            pos = box.bottomRight() + offset
             height = max(pos.y() - box.top(), 0)
             new_box = QRectF(box.left(), box.top(), box.width(), height)
         elif self.handleSelected == 6:
+            pos = box.bottomLeft() + offset
             left = min(pos.x(), box.right())
             width = max(box.right() - pos.x(), 0)
             height = max(pos.y() - box.top(), 0)
             new_box = QRectF(left, box.top(), width, height)
         elif self.handleSelected == 7:
+            pos = box.bottomLeft() + offset
             left = min(pos.x(), box.right())
             width = max(box.right() - pos.x(), 0)
             new_box = QRectF(left, box.top(), width, box.height())
+        new_box = QRectF(round(new_box.left()),
+                         round(new_box.top()),
+                         round(new_box.width()),
+                         round(new_box.height()))
         self.setRect(new_box)
         self.setHandlesPos()
         self.signalHandler.boxChanged.emit(self.data(0), self.data(1), new_box)
 
+    def boundingRect(self):
+        rect = super().boundingRect()
+        for handle in self.handles:
+            rect |= handle.boundingRect()
+        return rect
+
     def shape(self):
         path = QPainterPath()
-        path.addRect(self.boundingRect())
+        path.setFillRule(Qt.WindingFill)
+        path.addRect(self.rect())
+        for handle in self.handles:
+            path.addRect(handle.boundingRect())
         return path
 
 
