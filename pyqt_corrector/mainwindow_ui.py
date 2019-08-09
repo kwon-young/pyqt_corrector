@@ -3,7 +3,7 @@
 # Form implementation generated from reading ui file 'data/mainwindow.ui',
 # licensing of 'data/mainwindow.ui' applies.
 #
-# Created: Thu Aug  8 16:49:57 2019
+# Created: Fri Aug  9 18:43:27 2019
 #      by: pyside2-uic  running on PySide2 5.9.0~a1
 #
 # WARNING! All changes made in this file will be lost!
@@ -87,6 +87,10 @@ class Ui_MainWindow(object):
         self.menuFile.setObjectName("menuFile")
         self.menuTools = QtWidgets.QMenu(self.menubar)
         self.menuTools.setObjectName("menuTools")
+        self.menuedit = QtWidgets.QMenu(self.menubar)
+        self.menuedit.setObjectName("menuedit")
+        self.menuView = QtWidgets.QMenu(self.menubar)
+        self.menuView.setObjectName("menuView")
         MainWindow.setMenuBar(self.menubar)
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
         self.statusbar.setObjectName("statusbar")
@@ -106,14 +110,34 @@ class Ui_MainWindow(object):
         self.actionStopwatch_Stop.setObjectName("actionStopwatch_Stop")
         self.actionStopwatch_Reset = QtWidgets.QAction(MainWindow)
         self.actionStopwatch_Reset.setObjectName("actionStopwatch_Reset")
+        self.actionSend_to_left_tab = QtWidgets.QAction(MainWindow)
+        self.actionSend_to_left_tab.setObjectName("actionSend_to_left_tab")
+        self.actionSend_to_right_tab = QtWidgets.QAction(MainWindow)
+        self.actionSend_to_right_tab.setObjectName("actionSend_to_right_tab")
+        self.actionPrevious_box = QtWidgets.QAction(MainWindow)
+        self.actionPrevious_box.setObjectName("actionPrevious_box")
+        self.actionNext_box = QtWidgets.QAction(MainWindow)
+        self.actionNext_box.setObjectName("actionNext_box")
+        self.actionNext_label = QtWidgets.QAction(MainWindow)
+        self.actionNext_label.setObjectName("actionNext_label")
+        self.actionPrevious_label = QtWidgets.QAction(MainWindow)
+        self.actionPrevious_label.setObjectName("actionPrevious_label")
         self.menuFile.addAction(self.actionOpen_Directory)
         self.menuFile.addAction(self.actionSave_Dataset)
         self.menuFile.addAction(self.actionQuit)
         self.menuTools.addAction(self.actionStopwatch_Start)
         self.menuTools.addAction(self.actionStopwatch_Stop)
         self.menuTools.addAction(self.actionStopwatch_Reset)
+        self.menuedit.addAction(self.actionSend_to_left_tab)
+        self.menuedit.addAction(self.actionSend_to_right_tab)
+        self.menuedit.addAction(self.actionNext_label)
+        self.menuedit.addAction(self.actionPrevious_label)
+        self.menuView.addAction(self.actionPrevious_box)
+        self.menuView.addAction(self.actionNext_box)
         self.menubar.addAction(self.menuFile.menuAction())
         self.menubar.addAction(self.menuTools.menuAction())
+        self.menubar.addAction(self.menuedit.menuAction())
+        self.menubar.addAction(self.menuView.menuAction())
         self.toolBar.addAction(self.actionOpen_Directory)
         self.toolBar.addAction(self.actionSave_Dataset)
         self.toolBar.addAction(self.actionStopwatch_Start)
@@ -129,6 +153,8 @@ class Ui_MainWindow(object):
         self.rightPushButton.setText(QtWidgets.QApplication.translate("MainWindow", "Send to right tab", None, -1))
         self.menuFile.setTitle(QtWidgets.QApplication.translate("MainWindow", "File", None, -1))
         self.menuTools.setTitle(QtWidgets.QApplication.translate("MainWindow", "Tools", None, -1))
+        self.menuedit.setTitle(QtWidgets.QApplication.translate("MainWindow", "edit", None, -1))
+        self.menuView.setTitle(QtWidgets.QApplication.translate("MainWindow", "View", None, -1))
         self.toolBar.setWindowTitle(QtWidgets.QApplication.translate("MainWindow", "toolBar", None, -1))
         self.actionOpen_Directory.setText(QtWidgets.QApplication.translate("MainWindow", "Open Directory", None, -1))
         self.actionOpen_Directory.setToolTip(QtWidgets.QApplication.translate("MainWindow", "Open Directory", None, -1))
@@ -140,6 +166,18 @@ class Ui_MainWindow(object):
         self.actionStopwatch_Start.setText(QtWidgets.QApplication.translate("MainWindow", "Stopwatch Start", None, -1))
         self.actionStopwatch_Stop.setText(QtWidgets.QApplication.translate("MainWindow", "Stopwatch Stop", None, -1))
         self.actionStopwatch_Reset.setText(QtWidgets.QApplication.translate("MainWindow", "Stopwatch Reset", None, -1))
+        self.actionSend_to_left_tab.setText(QtWidgets.QApplication.translate("MainWindow", "Send to left tab", None, -1))
+        self.actionSend_to_left_tab.setShortcut(QtWidgets.QApplication.translate("MainWindow", "S", None, -1))
+        self.actionSend_to_right_tab.setText(QtWidgets.QApplication.translate("MainWindow", "Send to right tab", None, -1))
+        self.actionSend_to_right_tab.setShortcut(QtWidgets.QApplication.translate("MainWindow", "G", None, -1))
+        self.actionPrevious_box.setText(QtWidgets.QApplication.translate("MainWindow", "Previous box", None, -1))
+        self.actionPrevious_box.setShortcut(QtWidgets.QApplication.translate("MainWindow", "F", None, -1))
+        self.actionNext_box.setText(QtWidgets.QApplication.translate("MainWindow", "Next box", None, -1))
+        self.actionNext_box.setShortcut(QtWidgets.QApplication.translate("MainWindow", "D", None, -1))
+        self.actionNext_label.setText(QtWidgets.QApplication.translate("MainWindow", "Next label", None, -1))
+        self.actionNext_label.setShortcut(QtWidgets.QApplication.translate("MainWindow", "E", None, -1))
+        self.actionPrevious_label.setText(QtWidgets.QApplication.translate("MainWindow", "Previous label", None, -1))
+        self.actionPrevious_label.setShortcut(QtWidgets.QApplication.translate("MainWindow", "R", None, -1))
 
 
 if __name__ == "__main__":

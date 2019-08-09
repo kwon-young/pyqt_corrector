@@ -67,6 +67,8 @@ class MainWindow(QMainWindow):
         self.comboBox = LabelComboBox(self.ui.scrollAreaWidgetContents)
         self.comboBox.setEditable(True)
         self.comboBox.setObjectName("comboBox")
+        self.ui.actionNext_label.triggered.connect(self.selectNextLabel)
+        self.ui.actionPrevious_label.triggered.connect(self.selectPreviousLabel)
         self.ui.gridLayout_2.addWidget(self.comboBox, 0, 0, 1, 1)
 
         self.imageViewer = ImageViewer(
@@ -84,15 +86,20 @@ class MainWindow(QMainWindow):
         self.leftIcon = QIcon().fromTheme("go-previous")
         self.ui.leftPushButton.setIcon(self.leftIcon)
         self.ui.leftPushButton.clicked.connect(self.moveRowToPrevious)
+        self.ui.actionSend_to_left_tab.triggered.connect(self.moveRowToPrevious)
         self.rightIcon = QIcon().fromTheme("go-next")
         self.ui.rightPushButton.setIcon(self.rightIcon)
         self.ui.rightPushButton.clicked.connect(self.moveRowToNext)
+        self.ui.actionSend_to_right_tab.triggered.connect(self.moveRowToNext)
         self.tabs = []
         self.gridLayouts_1 = []
         self.gridLayouts_2 = []
         self.tableViews = []
         self.tableModels = []
         self.tableNames = []
+
+        self.ui.actionNext_box.triggered.connect(self.selectNextRow)
+        self.ui.actionPrevious_box.triggered.connect(self.selectPreviousRow)
 
         self.changedDirectory.connect(self.readData)
 
@@ -229,6 +236,50 @@ class MainWindow(QMainWindow):
         self.comboBox.row = row
 
     @Slot()
+    def selectNextRow(self):
+        if self.ui.tabWidget.count() > 0:
+            tabIndex = self.ui.tabWidget.currentIndex()
+            view: QTableView = self.tableViews[tabIndex]
+            index = view.currentIndex()
+            model: TableModel = self.tableModels[tabIndex]
+            rowCount = model.rowCount(QModelIndex())
+            nextIndex: QModelIndex = model.index((index.row() + 1) % rowCount,
+                                                 index.column())
+            if nextIndex.isValid():
+                view.setCurrentIndex(nextIndex)
+                view.activated.emit(nextIndex)
+
+    @Slot()
+    def selectPreviousRow(self):
+        if self.ui.tabWidget.count() > 0:
+            tabIndex = self.ui.tabWidget.currentIndex()
+            view: QTableView = self.tableViews[tabIndex]
+            index = view.currentIndex()
+            model: TableModel = self.tableModels[tabIndex]
+            rowCount = model.rowCount(QModelIndex())
+            previousIndex: QModelIndex = model.index(
+                (rowCount + index.row() - 1) % rowCount, index.column())
+            if previousIndex.isValid():
+                view.setCurrentIndex(previousIndex)
+                view.activated.emit(previousIndex)
+
+    @Slot()
+    def selectNextLabel(self):
+        if self.comboBox.count() > 0:
+            index = self.comboBox.currentIndex()
+            newIndex = (index + 1) % self.comboBox.count()
+            self.comboBox.setCurrentIndex(newIndex)
+            self.comboBox.activated.emit(newIndex)
+
+    @Slot()
+    def selectPreviousLabel(self):
+        if self.comboBox.count() > 0:
+            index = self.comboBox.currentIndex()
+            newIndex = (self.comboBox.count() + index - 1) % self.comboBox.count()
+            self.comboBox.setCurrentIndex(newIndex)
+            self.comboBox.activated.emit(newIndex)
+
+    @Slot()
     def changeBox(self, name, row, box):
         index = self.tableNames.index(name)
         model = self.tableModels[index]
@@ -243,7 +294,7 @@ class MainWindow(QMainWindow):
             model: TableModel = self.tableModels[tabIndex]
             index = model.index(row, 1)
             model.setData(index, label, Qt.EditRole)
-            self.setWindowModified()
+            self.setWindowModified(True)
             rect: ResizableRect = self.imageViewer.curRect
             if rect is not None and self.imageViewer.color_map is not None:
                 rect.setColor(self.imageViewer.color_map[label])

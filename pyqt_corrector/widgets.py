@@ -8,6 +8,9 @@ from PySide2.QtGui import QPixmap, QWheelEvent, QKeyEvent, QMouseEvent, QResizeE
 from pyqt_corrector.models import TableModel
 
 
+seaborn.set()
+
+
 class LabelComboBox(QComboBox):
 
     """Combobox containing current object label"""
@@ -392,7 +395,7 @@ class ImageViewer(QWidget):
         loc = self.tableDatas[curModelIndex].index.get_loc(index.row())
         self.curRect = self.perModelResizableRects[self._dataNames[curModelIndex]][loc]
         boundingRect = self.curRect.boundingRect()
-        margin_size = min(boundingRect.width(), boundingRect.height()) / 2
+        margin_size = min(boundingRect.width(), boundingRect.height()) * 2
         margin = QMarginsF(*([margin_size] * 4))
         viewRect = boundingRect + margin
         self.view.fitInView(viewRect, Qt.KeepAspectRatio)
