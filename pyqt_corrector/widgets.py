@@ -1,6 +1,12 @@
+"""
+File: widgets.py
+Author: Kwon-Young Choi
+Email: kwon-young.choi@irisa.fr
+Date: 2019-08-09
+Description: Definitions of all widgets used in corrector
+"""
 import os
 import glob
-from itertools import zip_longest
 import seaborn
 from PySide2.QtWidgets import QWidget, QGraphicsScene, QGraphicsView, QGraphicsRectItem, QStyleOptionGraphicsItem, QCommonStyle, QStyle, QGraphicsSceneHoverEvent, QGraphicsItem, QGraphicsSceneMouseEvent, QGraphicsPixmapItem, QComboBox
 from PySide2.QtCore import Slot, Signal, QModelIndex, Qt, QTimeLine, QPointF, QRect, QMarginsF, QRectF, QSizeF, QObject
