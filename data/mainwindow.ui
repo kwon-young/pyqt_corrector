@@ -88,8 +88,8 @@
          <rect>
           <x>0</x>
           <y>0</y>
-          <width>723</width>
-          <height>681</height>
+          <width>662</width>
+          <height>663</height>
          </rect>
         </property>
         <property name="sizePolicy">
@@ -111,7 +111,7 @@
      <x>0</x>
      <y>0</y>
      <width>978</width>
-     <height>30</height>
+     <height>36</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -192,7 +192,7 @@
     <string>Save Dataset</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+S</string>
+    <string>Ctrl+S, W</string>
    </property>
   </action>
   <action name="actionStopwatch_Start">

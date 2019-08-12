@@ -8,7 +8,7 @@ Description: Definitions of all widgets used in corrector
 import os
 import glob
 import seaborn
-from PySide2.QtWidgets import QWidget, QGraphicsScene, QGraphicsView, QGraphicsRectItem, QStyleOptionGraphicsItem, QCommonStyle, QStyle, QGraphicsSceneHoverEvent, QGraphicsItem, QGraphicsSceneMouseEvent, QGraphicsPixmapItem, QComboBox
+from PySide2.QtWidgets import QWidget, QGraphicsScene, QGraphicsView, QGraphicsRectItem, QStyleOptionGraphicsItem, QCommonStyle, QStyle, QGraphicsSceneHoverEvent, QGraphicsItem, QGraphicsSceneMouseEvent, QGraphicsPixmapItem, QComboBox, QUndoCommand
 from PySide2.QtCore import Slot, Signal, QModelIndex, Qt, QTimeLine, QPointF, QRect, QMarginsF, QRectF, QSizeF, QObject
 from PySide2.QtGui import QPixmap, QWheelEvent, QKeyEvent, QMouseEvent, QResizeEvent, QPainter, QPainterPath, QColor, QPen
 from pyqt_corrector.models import TableModel
@@ -28,6 +28,21 @@ class LabelComboBox(QComboBox):
         super().__init__(parent)
         self.row = -1
 
+
+class GraphicsScene(QGraphicsScene):
+
+    """Custom GraphicsScene"""
+
+    def __init__(self, parent=None):
+        """Constructor
+        """
+        super().__init__(parent)
+
+    def mousePressEvent(self, event: QGraphicsSceneMouseEvent):
+        super().mousePressEvent(event)
+
+    def mouseReleaseEvent(self, event: QGraphicsSceneMouseEvent):
+        super().mousePressEvent(event)
 
 class SmoothView(QGraphicsView):
 
@@ -310,6 +325,22 @@ class ResizableRect(ColorRect):
         return path
 
 
+class AddRect(QUndoCommand):
+
+    """Add a ResizableRect"""
+
+    def __init__(self, scene: QGraphicsScene, parent: QUndoCommand):
+        """Constructor
+
+        :scene: QGraphicsScene to add item to
+
+        """
+        super().__init__(parent)
+
+        self.scene = scene
+        self.rect = ResizableRect()
+
+
 class ImageViewer(QWidget):
 
     """View an image and multiple annotated boxes"""
@@ -326,7 +357,7 @@ class ImageViewer(QWidget):
         super().__init__(parent)
 
         self.signalHandler = SignalHandler(self)
-        self.scene = QGraphicsScene()
+        self.scene = GraphicsScene()
         self.scene.clear()
 
         self.view = SmoothView(self.scene)

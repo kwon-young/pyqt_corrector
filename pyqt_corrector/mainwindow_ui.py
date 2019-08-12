@@ -3,8 +3,8 @@
 # Form implementation generated from reading ui file 'data/mainwindow.ui',
 # licensing of 'data/mainwindow.ui' applies.
 #
-# Created: Fri Aug  9 18:43:27 2019
-#      by: pyside2-uic  running on PySide2 5.9.0~a1
+# Created: Sat Aug 10 08:43:19 2019
+#      by: pyside2-uic  running on PySide2 5.13.0
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -68,7 +68,7 @@ class Ui_MainWindow(object):
         self.scrollArea.setWidgetResizable(True)
         self.scrollArea.setObjectName("scrollArea")
         self.scrollAreaWidgetContents = QtWidgets.QWidget()
-        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 723, 681))
+        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 662, 663))
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -81,7 +81,7 @@ class Ui_MainWindow(object):
         self.gridLayout_6.addWidget(self.splitter, 0, 0, 1, 1)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 978, 30))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 978, 36))
         self.menubar.setObjectName("menubar")
         self.menuFile = QtWidgets.QMenu(self.menubar)
         self.menuFile.setObjectName("menuFile")
@@ -162,7 +162,7 @@ class Ui_MainWindow(object):
         self.actionQuit.setText(QtWidgets.QApplication.translate("MainWindow", "Quit", None, -1))
         self.actionQuit.setShortcut(QtWidgets.QApplication.translate("MainWindow", "Ctrl+Q", None, -1))
         self.actionSave_Dataset.setText(QtWidgets.QApplication.translate("MainWindow", "Save Dataset", None, -1))
-        self.actionSave_Dataset.setShortcut(QtWidgets.QApplication.translate("MainWindow", "Ctrl+S", None, -1))
+        self.actionSave_Dataset.setShortcut(QtWidgets.QApplication.translate("MainWindow", "Ctrl+S, W", None, -1))
         self.actionStopwatch_Start.setText(QtWidgets.QApplication.translate("MainWindow", "Stopwatch Start", None, -1))
         self.actionStopwatch_Stop.setText(QtWidgets.QApplication.translate("MainWindow", "Stopwatch Stop", None, -1))
         self.actionStopwatch_Reset.setText(QtWidgets.QApplication.translate("MainWindow", "Stopwatch Reset", None, -1))

@@ -115,7 +115,7 @@ class MainWindow(QMainWindow):
         self.setWindowFilePath(QFileDialog.getExistingDirectory(
             self,
             QApplication.translate("MainWindow", "Open directory", None, -1),
-            "/home/kwon-young/Documents/PartageVirtualBox/data/omr_dataset/choi_dataset"))
+            "/home/kwon-young/Documents/choi_dataset"))
         self.setWindowTitle(f"Corrector {self.windowFilePath()} [*]")
         self.imageViewer.directory = self.windowFilePath()
         self.changedDirectory.emit()
