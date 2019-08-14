@@ -1,105 +1,67 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>MainWindow</class>
- <widget class="QMainWindow" name="MainWindow">
+ <widget class="MainWindow" name="MainWindow">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>978</width>
-    <height>784</height>
+    <width>1165</width>
+    <height>873</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Corrector [*]</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QGridLayout" name="gridLayout_6">
+   <layout class="QGridLayout" name="gridLayout">
     <item row="0" column="0">
      <widget class="QSplitter" name="splitter">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
       <property name="orientation">
        <enum>Qt::Horizontal</enum>
       </property>
-      <widget class="QWidget" name="verticalLayoutWidget">
+      <widget class="TabWidget" name="tabWidget">
+       <property name="currentIndex">
+        <number>-1</number>
+       </property>
+       <property name="documentMode">
+        <bool>false</bool>
+       </property>
+       <property name="tabsClosable">
+        <bool>true</bool>
+       </property>
+       <property name="movable">
+        <bool>false</bool>
+       </property>
+      </widget>
+      <widget class="QWidget" name="layoutWidget">
        <layout class="QVBoxLayout" name="verticalLayout_2">
         <item>
-         <layout class="QHBoxLayout" name="horizontalLayout">
-          <item>
-           <widget class="QPushButton" name="leftPushButton">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-              <horstretch>1</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="text">
-             <string>Send to left tab</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="rightPushButton">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-              <horstretch>1</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="layoutDirection">
-             <enum>Qt::LeftToRight</enum>
-            </property>
-            <property name="text">
-             <string>Send to right tab</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
+         <widget class="QComboBox" name="comboBox"/>
         </item>
         <item>
-         <widget class="QTabWidget" name="tabWidget">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-            <horstretch>1</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
+         <widget class="QScrollArea" name="scrollArea">
+          <property name="widgetResizable">
+           <bool>true</bool>
           </property>
+          <widget class="QWidget" name="scrollAreaWidgetContents">
+           <property name="geometry">
+            <rect>
+             <x>0</x>
+             <y>0</y>
+             <width>568</width>
+             <height>730</height>
+            </rect>
+           </property>
+           <layout class="QGridLayout" name="gridLayout_3">
+            <item row="0" column="0">
+             <widget class="SmoothView" name="graphicsView"/>
+            </item>
+           </layout>
+          </widget>
          </widget>
         </item>
        </layout>
-      </widget>
-      <widget class="QScrollArea" name="scrollArea">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-         <horstretch>1</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="widgetResizable">
-        <bool>true</bool>
-       </property>
-       <widget class="QWidget" name="scrollAreaWidgetContents">
-        <property name="geometry">
-         <rect>
-          <x>0</x>
-          <y>0</y>
-          <width>662</width>
-          <height>663</height>
-         </rect>
-        </property>
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <layout class="QGridLayout" name="gridLayout_2"/>
-       </widget>
       </widget>
      </widget>
     </item>
@@ -110,46 +72,44 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>978</width>
-     <height>36</height>
+     <width>1165</width>
+     <height>30</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
     <property name="title">
      <string>File</string>
     </property>
-    <addaction name="actionOpen_Directory"/>
-    <addaction name="actionSave_Dataset"/>
-    <addaction name="actionQuit"/>
+    <addaction name="actionOpen_Datasets"/>
+    <addaction name="actionClose_Dataset"/>
+    <addaction name="actionSave"/>
+   </widget>
+   <widget class="QMenu" name="menuEdit">
+    <property name="title">
+     <string>Edit</string>
+    </property>
+    <addaction name="actionSend_To_Left"/>
+    <addaction name="actionSend_To_Right"/>
+    <addaction name="separator"/>
+    <addaction name="actionNext_Item"/>
+    <addaction name="actionPrevious_Item"/>
+    <addaction name="separator"/>
+    <addaction name="actionNext_Label"/>
+    <addaction name="actionPrevious_Label"/>
+    <addaction name="separator"/>
+    <addaction name="actionDelete_Item"/>
    </widget>
    <widget class="QMenu" name="menuTools">
     <property name="title">
      <string>Tools</string>
     </property>
-    <addaction name="actionStopwatch_Start"/>
-    <addaction name="actionStopwatch_Stop"/>
-    <addaction name="actionStopwatch_Reset"/>
-   </widget>
-   <widget class="QMenu" name="menuedit">
-    <property name="title">
-     <string>edit</string>
-    </property>
-    <addaction name="actionSend_to_left_tab"/>
-    <addaction name="actionSend_to_right_tab"/>
-    <addaction name="actionNext_label"/>
-    <addaction name="actionPrevious_label"/>
-   </widget>
-   <widget class="QMenu" name="menuView">
-    <property name="title">
-     <string>View</string>
-    </property>
-    <addaction name="actionPrevious_box"/>
-    <addaction name="actionNext_box"/>
+    <addaction name="actionTimer_Start"/>
+    <addaction name="actionTimer_Stop"/>
+    <addaction name="actionTimer_Reset"/>
    </widget>
    <addaction name="menuFile"/>
+   <addaction name="menuEdit"/>
    <addaction name="menuTools"/>
-   <addaction name="menuedit"/>
-   <addaction name="menuView"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <widget class="QToolBar" name="toolBar">
@@ -162,103 +122,403 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
-   <addaction name="actionOpen_Directory"/>
-   <addaction name="actionSave_Dataset"/>
-   <addaction name="actionStopwatch_Start"/>
-   <addaction name="actionStopwatch_Stop"/>
-   <addaction name="actionStopwatch_Reset"/>
+   <addaction name="actionOpen_Datasets"/>
+   <addaction name="actionSave"/>
+   <addaction name="actionClose_Dataset"/>
+   <addaction name="separator"/>
+   <addaction name="actionSend_To_Left"/>
+   <addaction name="actionSend_To_Right"/>
+   <addaction name="actionNext_Item"/>
+   <addaction name="actionPrevious_Item"/>
+   <addaction name="actionNext_Label"/>
+   <addaction name="actionPrevious_Label"/>
+   <addaction name="separator"/>
+   <addaction name="actionTimer_Start"/>
+   <addaction name="actionTimer_Stop"/>
+   <addaction name="actionTimer_Reset"/>
   </widget>
-  <action name="actionOpen_Directory">
+  <action name="actionOpen_Datasets">
    <property name="text">
-    <string>Open Directory</string>
-   </property>
-   <property name="toolTip">
-    <string>Open Directory</string>
+    <string>Open Datasets</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+O</string>
    </property>
   </action>
-  <action name="actionQuit">
+  <action name="actionClose_Dataset">
    <property name="text">
-    <string>Quit</string>
+    <string>Close Dataset</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+Q</string>
+    <string>Ctrl+W</string>
    </property>
   </action>
-  <action name="actionSave_Dataset">
+  <action name="actionSend_To_Left">
    <property name="text">
-    <string>Save Dataset</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+S, W</string>
-   </property>
-  </action>
-  <action name="actionStopwatch_Start">
-   <property name="text">
-    <string>Stopwatch Start</string>
-   </property>
-  </action>
-  <action name="actionStopwatch_Stop">
-   <property name="text">
-    <string>Stopwatch Stop</string>
-   </property>
-  </action>
-  <action name="actionStopwatch_Reset">
-   <property name="text">
-    <string>Stopwatch Reset</string>
-   </property>
-  </action>
-  <action name="actionSend_to_left_tab">
-   <property name="text">
-    <string>Send to left tab</string>
+    <string>Send To Left</string>
    </property>
    <property name="shortcut">
     <string>S</string>
    </property>
   </action>
-  <action name="actionSend_to_right_tab">
+  <action name="actionSend_To_Right">
    <property name="text">
-    <string>Send to right tab</string>
+    <string>Send To Right</string>
    </property>
    <property name="shortcut">
     <string>G</string>
    </property>
   </action>
-  <action name="actionPrevious_box">
+  <action name="actionSave">
    <property name="text">
-    <string>Previous box</string>
+    <string>Save</string>
    </property>
    <property name="shortcut">
-    <string>F</string>
+    <string>Ctrl+S</string>
    </property>
   </action>
-  <action name="actionNext_box">
+  <action name="actionNext_Item">
    <property name="text">
-    <string>Next box</string>
+    <string>Next Item</string>
    </property>
    <property name="shortcut">
     <string>D</string>
    </property>
   </action>
-  <action name="actionNext_label">
+  <action name="actionPrevious_Item">
    <property name="text">
-    <string>Next label</string>
+    <string>Previous Item</string>
+   </property>
+   <property name="shortcut">
+    <string>F</string>
+   </property>
+  </action>
+  <action name="actionNext_Label">
+   <property name="text">
+    <string>Next Label</string>
    </property>
    <property name="shortcut">
     <string>E</string>
    </property>
   </action>
-  <action name="actionPrevious_label">
+  <action name="actionPrevious_Label">
    <property name="text">
-    <string>Previous label</string>
+    <string>Previous Label</string>
    </property>
    <property name="shortcut">
     <string>R</string>
    </property>
   </action>
+  <action name="actionTimer_Start">
+   <property name="text">
+    <string>Timer Start</string>
+   </property>
+  </action>
+  <action name="actionTimer_Stop">
+   <property name="text">
+    <string>Timer Stop</string>
+   </property>
+  </action>
+  <action name="actionTimer_Reset">
+   <property name="text">
+    <string>Timer Reset</string>
+   </property>
+  </action>
+  <action name="actionDelete_Item">
+   <property name="text">
+    <string>Delete Item</string>
+   </property>
+   <property name="shortcut">
+    <string>X</string>
+   </property>
+  </action>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>MainWindow</class>
+   <extends>QMainWindow</extends>
+   <header>pyqt_corrector/mainwindow.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>SmoothView</class>
+   <extends>QGraphicsView</extends>
+   <header>pyqt_corrector/smoothview.h</header>
+   <slots>
+    <signal>viewPortMoved(QRectF,QRectF)</signal>
+   </slots>
+  </customwidget>
+  <customwidget>
+   <class>TabWidget</class>
+   <extends>QTabWidget</extends>
+   <header>pyqt_corrector/tabwidget.h</header>
+   <container>1</container>
+   <slots>
+    <signal>cellClickedSignal(int,QModelIndex,int,QModelIndex)</signal>
+    <slot>cellClicked(QModelIndex)</slot>
+   </slots>
+  </customwidget>
+ </customwidgets>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>actionOpen_Datasets</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>openDatasets()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>399</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionClose_Dataset</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>closeDataset()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>399</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionSend_To_Left</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>sendToLeft()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>399</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionSend_To_Right</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>sendToRight()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>399</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>tabWidget</sender>
+   <signal>tabCloseRequested(int)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>closeDataset(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>203</x>
+     <y>303</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>399</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>tabWidget</sender>
+   <signal>tabBarClicked(int)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>currentTabChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>203</x>
+     <y>303</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>399</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>tabWidget</sender>
+   <signal>cellClickedSignal(int,QModelIndex,int,QModelIndex)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>cellClicked(int,QModelIndex,int,QModelIndex)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>203</x>
+     <y>303</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>399</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>comboBox</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>labelChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>597</x>
+     <y>52</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>399</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionSave</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>saveDataToDisk()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>399</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionNext_Item</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>SelectNextItem()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>399</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionPrevious_Item</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>SelectPreviousItem()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>399</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionNext_Label</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>selectNextLabel()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>399</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionPrevious_Label</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>selectPreviousLabel()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>399</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>graphicsView</sender>
+   <signal>viewportMoved(QRectF,QRectF)</signal>
+   <receiver>MainWindow</receiver>
+   <slot>viewportMoved(QRectF,QRectF)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>597</x>
+     <y>322</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>399</x>
+     <y>299</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionDelete_Item</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>deleteItem()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>582</x>
+     <y>436</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>openDatasets()</slot>
+  <slot>closeDataset(int)</slot>
+  <slot>sendToRight()</slot>
+  <slot>sendToLeft()</slot>
+  <slot>closeDataset()</slot>
+  <slot>currentTabChanged(int)</slot>
+  <slot>tabInserted(int)</slot>
+  <slot>cellClicked(int,QModelIndex,int,QModelIndex)</slot>
+  <slot>labelChanged(int)</slot>
+  <slot>saveDataToDisk()</slot>
+  <slot>cleanChanged(bool)</slot>
+  <slot>SelectPreviousItem()</slot>
+  <slot>SelectNextItem()</slot>
+  <slot>selectPreviousLabel()</slot>
+  <slot>selectNextLabel()</slot>
+  <slot>viewportMoved(QRectF,QRectF)</slot>
+  <slot>deleteItem()</slot>
+ </slots>
 </ui>
