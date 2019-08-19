@@ -88,6 +88,10 @@ class GraphicsScene(QGraphicsScene):
                 box.rowIndex -= 1
         return res
 
+    def removeAllBoxes(self):
+        for box in self.boxes():
+            self.removeItem(box)
+
     def boxes(self):
         for item in self.items():
             if isinstance(item, ResizableRect):
@@ -123,3 +127,9 @@ class GraphicsScene(QGraphicsScene):
             if item.tabIndex == tabIndex and item.rowIndex == rowIndex:
                 return item
         raise "Box not found"
+
+    def addTabItemZValue(self, tabIndex, zValue):
+        for item in self.boxes():
+            if item.tabIndex == tabIndex:
+                curZValue = item.zValue()
+                item.setZValue(curZValue + zValue)

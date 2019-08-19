@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1165</width>
-    <height>873</height>
+    <width>1445</width>
+    <height>882</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -49,8 +49,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>568</width>
-             <height>730</height>
+             <width>707</width>
+             <height>739</height>
             </rect>
            </property>
            <layout class="QGridLayout" name="gridLayout_3">
@@ -72,7 +72,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1165</width>
+     <width>1445</width>
      <height>30</height>
     </rect>
    </property>
@@ -98,6 +98,9 @@
     <addaction name="actionPrevious_Label"/>
     <addaction name="separator"/>
     <addaction name="actionDelete_Item"/>
+    <addaction name="separator"/>
+    <addaction name="actionTab_Item_Forward"/>
+    <addaction name="actionTab_Item_Backward"/>
    </widget>
    <widget class="QMenu" name="menuTools">
     <property name="title">
@@ -136,6 +139,9 @@
    <addaction name="actionTimer_Start"/>
    <addaction name="actionTimer_Stop"/>
    <addaction name="actionTimer_Reset"/>
+   <addaction name="separator"/>
+   <addaction name="actionTab_Item_Forward"/>
+   <addaction name="actionTab_Item_Backward"/>
   </widget>
   <action name="actionOpen_Datasets">
    <property name="text">
@@ -230,6 +236,16 @@
    </property>
    <property name="shortcut">
     <string>X</string>
+   </property>
+  </action>
+  <action name="actionTab_Item_Forward">
+   <property name="text">
+    <string>Tab Item Forward</string>
+   </property>
+  </action>
+  <action name="actionTab_Item_Backward">
+   <property name="text">
+    <string>Tab Item Backward</string>
    </property>
   </action>
  </widget>
@@ -501,6 +517,38 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionTab_Item_Forward</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>tabItemForward()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>582</x>
+     <y>436</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionTab_Item_Backward</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>tabItemBackward()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>582</x>
+     <y>436</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>openDatasets()</slot>
@@ -520,5 +568,8 @@
   <slot>selectNextLabel()</slot>
   <slot>viewportMoved(QRectF,QRectF)</slot>
   <slot>deleteItem()</slot>
+  <slot>createItem(ResizableRect)</slot>
+  <slot>tabItemForward()</slot>
+  <slot>tabItemBackward()</slot>
  </slots>
 </ui>

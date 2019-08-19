@@ -666,3 +666,19 @@ class CreateItemCommand(QUndoCommand):
             self.graphicsScene.insertBox(
                 self.rect.tabIndex, self.rect.rowIndex, self.rect)
         self.comboBox.setCurrentText(self.rect.label)
+
+
+class ChangeTabItemZValueCommand(QUndoCommand):
+
+    def __init__(self, tabIndex, zValue, graphicsScene, parent=None):
+        super().__init__(parent)
+
+        self.tabIndex = tabIndex
+        self.zValue = zValue
+        self.graphicsScene: GraphicsScene = graphicsScene
+
+    def undo(self):
+        self.graphicsScene.addTabItemZValue(self.tabIndex, -self.zValue)
+
+    def redo(self):
+        self.graphicsScene.addTabItemZValue(self.tabIndex, self.zValue)

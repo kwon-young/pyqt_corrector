@@ -11,7 +11,8 @@ from PySide2.QtCore import Slot, Qt, QModelIndex, QRectF, QTime, QTimer
 from PySide2.QtGui import QKeySequence, QIcon
 from pyqt_corrector.commands import OpenDatasetCommand, DeleteDatasetCommand, \
     SendToCommand, CellClickedCommand, LabelChangedCommand, SelectBoxCommand, \
-    MoveBoxCommand, ViewportMovedCommand, DeleteItemCommand, CreateItemCommand
+    MoveBoxCommand, ViewportMovedCommand, DeleteItemCommand, \
+    CreateItemCommand, ChangeTabItemZValueCommand
 from pyqt_corrector.graphicsscene import GraphicsScene
 from pyqt_corrector.graphicsitem import ResizableRect
 
@@ -321,3 +322,15 @@ class MainWindow(QMainWindow):
         self.undoStack.push(createItemCommand)
         self.selectBox(rect.tabIndex, rect.rowIndex)
         self.undoStack.endMacro()
+
+    @Slot()
+    def tabItemForward(self):
+        changeTabItemZValueCommand = ChangeTabItemZValueCommand(
+            self.tabWidget.currentIndex(), 1, self.graphicsScene)
+        self.undoStack.push(changeTabItemZValueCommand)
+
+    @Slot()
+    def tabItemBackward(self):
+        changeTabItemZValueCommand = ChangeTabItemZValueCommand(
+            self.tabWidget.currentIndex(), -1, self.graphicsScene)
+        self.undoStack.push(changeTabItemZValueCommand)
