@@ -401,10 +401,11 @@ class LabelChangedCommand(QUndoCommand):
     This action will:
     * set the label of the corresponding row in tablemodel
     * set the correct color of the corresponding box
+    * set the correct label of the corresponding box
     Undoing will:
     * set the previous label in the comboBox
     * set the previous label in the tablemodel
-    * set the previous color of the corresponding box
+    * set the previous label of the corresponding box
     """
 
     def __init__(self, label, tabIndex, cellIndex, tabWidget, graphicsScene,
@@ -430,6 +431,8 @@ class LabelChangedCommand(QUndoCommand):
         self.comboBox.blockSignals(False)
         self.graphicsScene.box(self.tabIndex, self.cellIndex.row()).setColor(
             self.prevColor)
+        self.graphicsScene.box(self.tabIndex, self.cellIndex.row()).setLabel(
+            self.prevLabel)
         self.tabWidget.setCurrentIndex(self.tabIndex)
 
     def redo(self):
@@ -441,6 +444,8 @@ class LabelChangedCommand(QUndoCommand):
         color_map = self.tabWidget.color_map(self.tabIndex)
         self.graphicsScene.box(self.tabIndex, self.cellIndex.row()).setColor(
             color_map[self.label])
+        self.graphicsScene.box(self.tabIndex, self.cellIndex.row()).setLabel(
+            self.label)
         self.setText(f"Change box label to {self.label}")
 
     def id(self):
