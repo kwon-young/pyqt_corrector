@@ -99,11 +99,17 @@ class MainWindow(QMainWindow):
         targetIndex = (numTabs + originIndex - 1) % numTabs
         modelIndex = self.tabWidget.getCurrentTableView().currentIndex()
         if modelIndex.isValid():
+            self.undoStack.beginMacro(f"Send item to {targetIndex}")
             sendToCommand = SendToCommand(
                 originIndex, targetIndex, modelIndex.row(), self.tabWidget,
-                self.graphicsView, self.graphicsScene, self.comboBox,
-                self.messageLabel)
+                self.graphicsScene)
             self.undoStack.push(sendToCommand)
+            modelIndex = modelIndex.model().index(
+                modelIndex.row(), modelIndex.column())
+            if modelIndex.isValid():
+                self.cellClicked(originIndex, modelIndex, originIndex,
+                                 modelIndex)
+            self.undoStack.endMacro()
 
     @Slot()
     def sendToRight(self):
@@ -112,11 +118,17 @@ class MainWindow(QMainWindow):
         targetIndex = (originIndex + 1) % numTabs
         modelIndex = self.tabWidget.getCurrentTableView().currentIndex()
         if modelIndex.isValid():
+            self.undoStack.beginMacro(f"Send item to {targetIndex}")
             sendToCommand = SendToCommand(
                 originIndex, targetIndex, modelIndex.row(), self.tabWidget,
-                self.graphicsView, self.graphicsScene, self.comboBox,
-                self.messageLabel)
+                self.graphicsScene)
             self.undoStack.push(sendToCommand)
+            modelIndex = modelIndex.model().index(
+                modelIndex.row(), modelIndex.column())
+            if modelIndex.isValid():
+                self.cellClicked(originIndex, modelIndex, originIndex,
+                                 modelIndex)
+            self.undoStack.endMacro()
 
     @Slot()
     @Slot(int)
@@ -134,17 +146,27 @@ class MainWindow(QMainWindow):
     @Slot()
     def openDatasets(self):
         """Open dataset directory"""
+        prevTabIndex = self.tabWidget.currentIndex()
+        prevModelIndex = self.tabWidget.getCurrentSelectedCell()
+        numTabs = self.tabWidget.count()
         (filenames, _ext) = QFileDialog.getOpenFileNames(
             self,
             QApplication.translate("MainWindow", "Open datasets", None, -1),
             "/home/kwon-young/Documents/PartageVirtualBox/data/omr_dataset/choi_dataset",
             "*.csv")
         if filenames:
+            self.undoStack.beginMacro(f"open Datasets {filenames}")
             filenames.sort()
             openDatasetCommand = OpenDatasetCommand(
-                filenames, self.tabWidget, self.comboBox, self.graphicsView,
-                self.graphicsScene, self.messageLabel)
+                filenames, self.tabWidget, self.comboBox, self.graphicsScene,
+                self.messageLabel)
             self.undoStack.push(openDatasetCommand)
+            tabIndex = numTabs
+            modelIndex = self.tabWidget.getCurrentTableModel().index(0, 0)
+            if modelIndex.isValid():
+                self.cellClicked(tabIndex, modelIndex, prevTabIndex,
+                                 prevModelIndex)
+            self.undoStack.endMacro()
 
     @Slot(int)
     def currentTabChanged(self, index):
@@ -285,7 +307,10 @@ class MainWindow(QMainWindow):
             tabIndex, cellIndex, self.tabWidget, self.graphicsView,
             self.graphicsScene, self.comboBox)
         self.undoStack.push(deleteItemCommand)
-        self.cellClicked(tabIndex, cellIndex, tabIndex, cellIndex)
+        cellIndex = cellIndex.model().index(
+            cellIndex.row(), cellIndex.column())
+        if cellIndex.isValid():
+            self.cellClicked(tabIndex, cellIndex, tabIndex, cellIndex)
         self.undoStack.endMacro()
 
     @Slot(ResizableRect)

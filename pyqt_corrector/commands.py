@@ -146,24 +146,16 @@ class OpenDatasetCommand(QUndoCommand):
     the previous state.
     """
 
-    def __init__(self, filenames, tabWidget, comboBox, graphicsView,
-                 graphicsScene, messageLabel, parent=None):
+    def __init__(self, filenames, tabWidget, comboBox, graphicsScene,
+                 messageLabel, parent=None):
         super().__init__(parent)
         self.filenames = filenames
         self.tabWidget: TabWidget = tabWidget
         self.comboBox: QComboBox = comboBox
-        self.graphicsView: SmoothView = graphicsView
         self.graphicsScene: GraphicsScene = graphicsScene
         self.messageLabel: QLabel = messageLabel
         self.tabIndices = []
         self.addedLabels = []
-        self.previousSelectedTabIndex = self.tabWidget.currentIndex()
-        self.previousSelectedCell = self.tabWidget.getCurrentSelectedCell()
-        self.previousSceneRect = self.graphicsView.mapToScene(
-            graphicsView.viewport().geometry()).boundingRect()
-        self.page = self.graphicsScene.page
-        self.items = self.graphicsScene.items()
-        self.label = self.comboBox.currentText()
 
     def undo(self):
         tabs = [self.tabWidget.widget(tabIndex)
@@ -183,24 +175,7 @@ class OpenDatasetCommand(QUndoCommand):
             self.comboBox.removeItem(index)
         self.addedLabels = []
 
-        self.graphicsScene.page = self.page
-        # self.graphicsScene.clear()
-        self.graphicsScene.removeAllItems()
-        for item in self.items:
-            self.graphicsScene.addItem(item)
-
-        if self.previousSelectedTabIndex > 0:
-            self.tabWidget.setCurrentIndex(self.previousSelectedTabIndex)
-            self.tabWidget.previousTabIndex = self.previousSelectedTabIndex
-            if self.previousSelectedCell.isValid():
-                self.tabWidget.setCurrentSelectedCell(self.previousSelectedCell)
-            self.comboBox.setCurrentText(self.label)
-            self.graphicsView.fitInView(self.previousSceneRect)
-            self.graphicsView.setFocus()
-
         self.comboBox.blockSignals(False)
-
-        self.setText(f"Close {self.filenames}")
 
     def redo(self):
         """ Open csv datasets from filenames.
@@ -245,39 +220,6 @@ class OpenDatasetCommand(QUndoCommand):
 
         self.setText(f"Open {self.filenames}")
 
-        self.tabWidget.setCurrentIndex(self.tabIndices[0])
-        self.tabWidget.previousTabIndex = self.tabIndices[0]
-        modelIndex = self.tabWidget.getCurrentTableModel().index(0, 0)
-        self.tabWidget.setCurrentSelectedCell(modelIndex)
-
-        page = self.tabWidget.getCurrentTableModel().pageAtIndex(modelIndex)
-        pattern = os.path.join(os.path.dirname(self.filenames[0]), page + ".*")
-        imageName = glob.glob(pattern)
-        if not imageName:
-            self.messageLabel.setText(f"{page} image not found")
-            return
-        self.graphicsScene.removeAllItems()
-        pixmap = QPixmap(imageName[0])
-        self.graphicsScene.setPage(page, pixmap)
-        for tabIndex, pageData in enumerate(self.tabWidget.pageDatas(page)):
-            tabName = self.tabWidget.tabText(tabIndex)
-            for rowIndex, rowData in pageData.iterrows():
-                label = rowData["label"]
-                color = self.tabWidget.color_map(tabIndex)[label]
-                self.graphicsScene.addBox(
-                    tabIndex, tabName, rowIndex, page, label, rowData["box"],
-                    color)
-
-        box = self.graphicsScene.box(self.tabIndices[0], 0)
-        boundingRect = box.boundingRect()
-        margin_size = min(boundingRect.width(), boundingRect.height()) * 2
-        margin = QMarginsF(*([margin_size] * 4))
-        viewRect = boundingRect + margin
-        self.graphicsView.fitInView(viewRect, Qt.KeepAspectRatio)
-        self.graphicsView.setFocus()
-        self.comboBox.setCurrentText(box.label)
-        self.comboBox.blockSignals(False)
-
 
 class SendToCommand(QUndoCommand):
 
@@ -291,36 +233,23 @@ class SendToCommand(QUndoCommand):
     * change box color, tab index, row index and tab name
       (which affect the tooltip)
     * add back the box to the graphicsScene
-    * the next row in the origin tab is selected, which updates the current
-      page and boxes of the graphicsScene only if the page is different,
-    * update viewport of the graphicsView current label of the combobox.
     Undoing will do exactly the same actions as redo but:
     * the row and box are inserted back to their original row, which in
       turn update the row indices of all boxes from the same tab.
     * restore graphicsScene item and page only if the page was different,
-    * restore viewport and label,
-    * there is a possibility that the current tab changed, so restore
-      the previously active tab
     """
 
     def __init__(self, originIndex, targetIndex, originRow, tabWidget,
-                 graphicsView, graphicsScene, comboBox, messageLabel,
-                 parent=None):
+                 graphicsScene, parent=None):
         super().__init__(parent)
         self.originIndex = originIndex
         self.targetIndex = targetIndex
         self.originRow = originRow
         self.tabWidget: TabWidget = tabWidget
-        self.graphicsView: SmoothView = graphicsView
         self.graphicsScene: GraphicsScene = graphicsScene
-        self.comboBox: QComboBox = comboBox
-        self.messageLabel: QLabel = messageLabel
         self.targetRow = None
         self.page = self.graphicsScene.page
         self.items = self.graphicsScene.items()
-        self.sceneRect = self.graphicsView.mapToScene(
-            graphicsView.viewport().geometry()).boundingRect()
-        self.label = self.comboBox.currentText()
 
     def undo(self):
         originModel = self.tabWidget.getTableModel(self.originIndex)
@@ -333,12 +262,6 @@ class SendToCommand(QUndoCommand):
         self.graphicsScene.removeAllItems()
         for item in self.items:
             self.graphicsScene.addItem(item)
-        self.graphicsView.fitInView(self.sceneRect)
-        self.comboBox.blockSignals(True)
-        self.comboBox.setCurrentText(self.label)
-        self.comboBox.blockSignals(False)
-        self.tabWidget.setCurrentIndex(self.originIndex)
-        self.tabWidget.previousCellIndex = self.originIndex
 
     def redo(self):
         originModel = self.tabWidget.getTableModel(self.originIndex)
@@ -353,40 +276,6 @@ class SendToCommand(QUndoCommand):
             self.targetIndex, self.tabWidget.tabText(self.targetIndex),
             self.targetRow, rect.page, rect.label, rect.rect(),
             self.tabWidget.color_map(self.targetIndex)[rect.label])
-
-        modelIndex = self.tabWidget.getCurrentSelectedCell()
-        page = modelIndex.model().pageAtIndex(modelIndex)
-        if page != self.page:
-            filename = self.tabWidget.currentWidget().filename
-            pattern = os.path.join(os.path.dirname(filename), page + ".*")
-            imageName = glob.glob(pattern)
-            if not imageName:
-                self.messageLabel.setText(f"{page} image not found")
-                return
-            self.graphicsScene.removeAllItems()
-            pixmap = QPixmap(imageName[0])
-            self.graphicsScene.setPage(page, pixmap)
-            for tabIndex, pageData in enumerate(
-                    self.tabWidget.pageDatas(page)):
-                tabName = self.tabWidget.tabText(tabIndex)
-                for rowIndex, rowData in pageData.iterrows():
-                    label = rowData["label"]
-                    color = self.tabWidget.color_map(tabIndex)[label]
-                    self.graphicsScene.addBox(
-                        tabIndex, tabName, rowIndex, page, label,
-                        rowData["box"], color)
-
-        box = self.graphicsScene.box(self.tabWidget.currentIndex(),
-                                     modelIndex.row())
-        boundingRect = box.boundingRect()
-        margin_size = min(boundingRect.width(), boundingRect.height()) * 2
-        margin = QMarginsF(*([margin_size] * 4))
-        viewRect = boundingRect + margin
-        self.graphicsView.fitInView(viewRect, Qt.KeepAspectRatio)
-        self.graphicsView.setFocus()
-        self.comboBox.blockSignals(True)
-        self.comboBox.setCurrentText(box.label)
-        self.comboBox.blockSignals(False)
 
         self.setText(f"Sending {self.originRow} from {originModel} to {targetModel}")
 
@@ -411,9 +300,11 @@ class CellClickedCommand(QUndoCommand):
                  parent=None):
         super().__init__(parent)
         self.tabIndex = tabIndex
-        self.cellIndex: QModelIndex = cellIndex
+        self.row = cellIndex.row()
+        self.col = cellIndex.column()
         self.prevTabIndex = prevTabIndex
-        self.prevCellIndex: QModelIndex = prevCellIndex
+        self.prevRow = prevCellIndex.row()
+        self.prevCol = prevCellIndex.column()
         self.tabWidget: TabWidget = tabWidget
         self.graphicsScene: GraphicsScene = graphicsScene
         self.graphicsView: SmoothView = graphicsView
@@ -425,7 +316,9 @@ class CellClickedCommand(QUndoCommand):
         self.label = self.comboBox.currentText()
 
     def undo(self):
-        if self.page != self.graphicsScene.page:
+        if self.page != self.graphicsScene.page or \
+                self.tabIndex != self.prevTabIndex:
+            self.graphicsScene.page = self.page
             self.graphicsScene.removeAllItems()
             for item in self.items:
                 self.graphicsScene.addItem(item)
@@ -435,19 +328,24 @@ class CellClickedCommand(QUndoCommand):
         else:
             self.prevTabIndex = self.tabWidget.currentIndex()
         self.tabWidget.getTableView(self.prevTabIndex).clearSelection()
-        self.tabWidget.setCurrentSelectedCell(self.prevCellIndex)
+        prevCellIndex = self.tabWidget.getCurrentTableModel().index(
+            self.prevRow, self.prevCol)
+        self.tabWidget.setCurrentSelectedCell(prevCellIndex)
         self.graphicsView.fitInView(self.previousSceneRect)
         self.graphicsView.setFocus()
-        self.tabWidget.previousCellIndex = self.prevCellIndex
+        self.tabWidget.previousCellIndex = prevCellIndex
         self.tabWidget.previousTabIndex = self.prevTabIndex
         self.comboBox.blockSignals(True)
         self.comboBox.setCurrentText(self.label)
         self.comboBox.blockSignals(False)
 
     def redo(self):
+        self.tabWidget.setCurrentIndex(self.tabIndex)
         self.tabWidget.getTableView(self.tabIndex).clearSelection()
-        self.tabWidget.setCurrentSelectedCell(self.cellIndex)
-        page = self.cellIndex.model().pageAtIndex(self.cellIndex)
+        model = self.tabWidget.getCurrentTableModel()
+        cellIndex = model.index(self.row, self.col)
+        self.tabWidget.setCurrentSelectedCell(cellIndex)
+        page = model.pageAtIndex(cellIndex)
         if page != self.page:
             filename = self.tabWidget.widget(self.tabIndex).filename
             pattern = os.path.join(os.path.dirname(filename), page + ".*")
@@ -458,6 +356,8 @@ class CellClickedCommand(QUndoCommand):
             self.graphicsScene.removeAllItems()
             pixmap = QPixmap(imageName[0])
             self.graphicsScene.setPage(page, pixmap)
+        if page != self.page or self.tabIndex != self.prevTabIndex:
+            self.graphicsScene.removeAllBoxes()
             for tabIndex, pageData in enumerate(
                     self.tabWidget.pageDatas(page)):
                 tabName = self.tabWidget.tabText(tabIndex)
@@ -467,7 +367,7 @@ class CellClickedCommand(QUndoCommand):
                     self.graphicsScene.addBox(
                         tabIndex, tabName, rowIndex, page, label,
                         rowData["box"], color)
-        box = self.graphicsScene.box(self.tabIndex, self.cellIndex.row())
+        box = self.graphicsScene.box(self.tabIndex, self.row)
         boundingRect = box.boundingRect()
         margin_size = min(boundingRect.width(), boundingRect.height()) * 2
         margin = QMarginsF(*([margin_size] * 4))
@@ -477,7 +377,7 @@ class CellClickedCommand(QUndoCommand):
         self.comboBox.blockSignals(True)
         self.comboBox.setCurrentText(box.label)
         self.comboBox.blockSignals(False)
-        self.setText(f"clicked row {self.tabIndex}:{self.cellIndex.row()}")
+        self.setText(f"clicked row {self.tabIndex}:{self.row}")
 
     def id(self):
         return 4
@@ -487,8 +387,9 @@ class CellClickedCommand(QUndoCommand):
             return False
 
         if self.tabIndex == other.tabIndex:
-            self.cellIndex = other.cellIndex
-            self.setText(f"clicked row {self.tabIndex}:{self.cellIndex.row()}")
+            self.row = other.row
+            self.col = other.col
+            self.setText(f"clicked row {self.tabIndex}:{self.row}")
             return True
 
         return False

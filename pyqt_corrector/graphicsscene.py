@@ -122,4 +122,4 @@ class GraphicsScene(QGraphicsScene):
         for item in self.boxes():
             if item.tabIndex == tabIndex and item.rowIndex == rowIndex:
                 return item
-        return None
+        raise "Box not found"
