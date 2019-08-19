@@ -153,11 +153,14 @@ class TableModel(QAbstractTableModel):
             if index.column() == 0:
                 raise "First column of dataset is not editable"
             if index.column() == 1:
-                self._data.iloc[index.row()][index.column()] = value
+                self._data.iloc[index.row(), index.column()] = value
+                assert self._data.iloc[index.row()][index.column()] == value
                 self.dataChanged.emit(index, index, role)
             if index.column() == 2:
-                self._data.iloc[index.row()][index.column()] = QRectF2Box(
+                self._data.iloc[index.row(), index.column()] = QRectF2Box(
                     value)
+                assert self._data.iloc[index.row()][index.column()] == \
+                    QRectF2Box(value)
                 self.dataChanged.emit(index, index, role)
                 return True
         return False
