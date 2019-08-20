@@ -49,7 +49,7 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>707</width>
+             <width>1285</width>
              <height>739</height>
             </rect>
            </property>
@@ -101,6 +101,9 @@
     <addaction name="separator"/>
     <addaction name="actionTab_Item_Forward"/>
     <addaction name="actionTab_Item_Backward"/>
+    <addaction name="separator"/>
+    <addaction name="actionCopy"/>
+    <addaction name="actionPaste"/>
    </widget>
    <widget class="QMenu" name="menuTools">
     <property name="title">
@@ -246,6 +249,22 @@
   <action name="actionTab_Item_Backward">
    <property name="text">
     <string>Tab Item Backward</string>
+   </property>
+  </action>
+  <action name="actionCopy">
+   <property name="text">
+    <string>Copy</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+C</string>
+   </property>
+  </action>
+  <action name="actionPaste">
+   <property name="text">
+    <string>Paste</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+V</string>
    </property>
   </action>
  </widget>
@@ -549,6 +568,38 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionCopy</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>copy()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>722</x>
+     <y>440</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionPaste</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>paste()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>722</x>
+     <y>440</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>openDatasets()</slot>
@@ -571,5 +622,7 @@
   <slot>createItem(ResizableRect)</slot>
   <slot>tabItemForward()</slot>
   <slot>tabItemBackward()</slot>
+  <slot>copy()</slot>
+  <slot>paste()</slot>
  </slots>
 </ui>

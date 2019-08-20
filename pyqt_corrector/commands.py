@@ -1,5 +1,6 @@
 import os
 import glob
+from copy import copy
 from PySide2.QtWidgets import QUndoCommand, QComboBox, QGridLayout, \
     QLabel
 from PySide2.QtCore import QModelIndex, QMarginsF, Qt
@@ -8,7 +9,7 @@ from pyqt_corrector.tablemodel import TableModel, openDataset
 from pyqt_corrector.tableview import TableView
 from pyqt_corrector.tabwidget import TabWidget, Tab
 from pyqt_corrector.graphicsscene import GraphicsScene
-from pyqt_corrector.graphicsitem import ResizableRect
+from pyqt_corrector.graphicsitem import ResizableRect, RectProp
 from pyqt_corrector.smoothview import SmoothView
 
 
@@ -682,3 +683,61 @@ class ChangeTabItemZValueCommand(QUndoCommand):
 
     def redo(self):
         self.graphicsScene.addTabItemZValue(self.tabIndex, self.zValue)
+
+
+class CopyCommand(QUndoCommand):
+
+    """Docstring for CopyCommand. """
+
+    def __init__(self, box, copyList, parent=None):
+        """Constructor
+        """
+        super().__init__(parent)
+
+        self.copyList = copyList
+        self.prop = RectProp(box)
+
+    def undo(self):
+        self.copyList.pop()
+
+    def redo(self):
+        self.copyList.append(self.prop)
+        self.setText(f"Copy {self.prop.box}")
+
+
+class PasteCommand(QUndoCommand):
+
+    """Docstring for PasteCommand. """
+
+    def __init__(self, pos, prop, tabWidget, graphicsScene, parent=None):
+        """Constructor
+
+        :pos: TODO
+        :copyList: TODO
+        :tabWidget: TODO
+        :graphicsScene: TODO
+        :parent: TODO
+
+        """
+        super().__init__(parent)
+
+        self.tabWidget: TabWidget = tabWidget
+        self.graphicsScene: GraphicsScene = graphicsScene
+        prop.tabIndex = self.tabWidget.currentIndex()
+        prop.tabName = self.tabWidget.tabText(prop.tabIndex)
+        model = self.tabWidget.getTableModel(prop.tabIndex)
+        prop.rowIndex = model.rowCount(QModelIndex())
+        prop.page = self.graphicsScene.page
+        prop.box.moveCenter(pos)
+        self.rect = ResizableRect.fromProp(prop)
+        self.rowData = model.makeRowData(prop.page, prop.label, prop.box)
+
+    def undo(self):
+        self.graphicsScene.removeBox(self.rect.tabIndex, self.rect.rowIndex)
+        model = self.tabWidget.getTableModel(self.rect.tabIndex)
+        model.deleteRow(self.rect.rowIndex)
+
+    def redo(self):
+        self.graphicsScene.addItem(self.rect)
+        model = self.tabWidget.getTableModel(self.rect.tabIndex)
+        model.appendRow(self.rowData)

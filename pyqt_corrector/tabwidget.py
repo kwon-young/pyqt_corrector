@@ -22,8 +22,12 @@ class TabWidget(QTabWidget):
         self.previousCellIndex = QModelIndex()
         self.previousTabIndex = -1
 
-    def filename(self, index):
-        return self.widget(index).filename
+    def filename(self, index=-1):
+        if index == -1:
+            widget = self.currentWidget()
+        else:
+            widget = self.widget(index)
+        return widget.filename
 
     def filenames(self):
         for i in range(self.count()):

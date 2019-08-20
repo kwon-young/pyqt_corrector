@@ -224,3 +224,28 @@ class ResizableRect(ColorRect):
         for handle in self.handles:
             path.addRect(handle.boundingRect())
         return path
+
+    @classmethod
+    def fromProp(cls, prop):
+        return cls(
+            prop.signalHandler,
+            prop.tabIndex,
+            prop.tabName,
+            prop.rowIndex,
+            prop.page,
+            prop.label,
+            prop.box,
+            prop.color)
+
+
+class RectProp():
+
+    def __init__(self, rect: ResizableRect):
+        self.signalHandler = rect.signalHandler
+        self.tabIndex = rect.tabIndex
+        self.tabName = rect.tabName
+        self.rowIndex = rect.rowIndex
+        self.page = rect.page
+        self.label = rect.label
+        self.box = rect.rect()
+        self.color = rect.color

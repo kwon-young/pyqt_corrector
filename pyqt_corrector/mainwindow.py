@@ -8,11 +8,11 @@ Description: MainWindow
 from PySide2.QtWidgets import QApplication, QMainWindow, QFileDialog, \
     QLabel, QUndoStack, QUndoView
 from PySide2.QtCore import Slot, Qt, QModelIndex, QRectF, QTime, QTimer
-from PySide2.QtGui import QKeySequence, QIcon
+from PySide2.QtGui import QKeySequence, QIcon, QCursor
 from pyqt_corrector.commands import OpenDatasetCommand, DeleteDatasetCommand, \
     SendToCommand, CellClickedCommand, LabelChangedCommand, SelectBoxCommand, \
     MoveBoxCommand, ViewportMovedCommand, DeleteItemCommand, \
-    CreateItemCommand, ChangeTabItemZValueCommand
+    CreateItemCommand, ChangeTabItemZValueCommand, CopyCommand, PasteCommand
 from pyqt_corrector.graphicsscene import GraphicsScene
 from pyqt_corrector.graphicsitem import ResizableRect
 
@@ -41,6 +41,8 @@ class MainWindow(QMainWindow):
         self.undoView = QUndoView(self.undoStack)
 
         self.graphicsScene = GraphicsScene(self)
+
+        self.copyList = []
 
     def setupUi(self):
         self.openIcon = QIcon().fromTheme("document-open")
@@ -334,3 +336,23 @@ class MainWindow(QMainWindow):
         changeTabItemZValueCommand = ChangeTabItemZValueCommand(
             self.tabWidget.currentIndex(), -1, self.graphicsScene)
         self.undoStack.push(changeTabItemZValueCommand)
+
+    @Slot()
+    def copy(self):
+        tabIndex = self.tabWidget.currentIndex()
+        cellIndex = self.tabWidget.getCurrentSelectedCell()
+        box = self.graphicsScene.box(tabIndex, cellIndex.row())
+        copyCommand = CopyCommand(box, self.copyList)
+        self.undoStack.push(copyCommand)
+
+    @Slot()
+    def paste(self):
+        pos = self.graphicsView.mapFromGlobal(QCursor.pos())
+        scenePos = self.graphicsView.mapToScene(pos)
+        prop = self.copyList[-1]
+        self.undoStack.beginMacro(f"paste item {prop.box}")
+        pasteCommand = PasteCommand(scenePos, prop, self.tabWidget,
+                                    self.graphicsScene)
+        self.undoStack.push(pasteCommand)
+        self.selectBox(prop.tabIndex, prop.rowIndex)
+        self.undoStack.endMacro()
