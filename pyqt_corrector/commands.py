@@ -1,6 +1,5 @@
 import os
 import glob
-from copy import copy
 from PySide2.QtWidgets import QUndoCommand, QComboBox, QGridLayout, \
     QLabel
 from PySide2.QtCore import QModelIndex, QMarginsF, Qt
@@ -180,10 +179,10 @@ class OpenDatasetCommand(QUndoCommand):
 
     def redo(self):
         """ Open csv datasets from filenames.
-        This function will update the tabWidget with different tabs, comboBox and GraphicsScene.
-        The GraphicsScene is updated completely by first removing all items and then
-        redrawing the page + all boxes belonging to the page.
-        Previous page and boxes are saved in the constructor.
+        This function will update the tabWidget with different tabs, comboBox
+        and GraphicsScene. The GraphicsScene is updated completely by first
+        removing all items and then redrawing the page + all boxes belonging to
+        the page. Previous page and boxes are saved in the constructor.
         """
         for filename in self.filenames:
             try:
@@ -298,7 +297,7 @@ class CellClickedCommand(QUndoCommand):
 
     def __init__(self, tabIndex, cellIndex, prevTabIndex, prevCellIndex,
                  tabWidget, graphicsScene, graphicsView, comboBox,
-                 parent=None):
+                 messageLabel, parent=None):
         super().__init__(parent)
         self.tabIndex = tabIndex
         self.row = cellIndex.row()
@@ -310,6 +309,7 @@ class CellClickedCommand(QUndoCommand):
         self.graphicsScene: GraphicsScene = graphicsScene
         self.graphicsView: SmoothView = graphicsView
         self.comboBox: QComboBox = comboBox
+        self.messageLabel: QLabel = messageLabel
         self.previousSceneRect = self.graphicsView.mapToScene(
             graphicsView.viewport().geometry()).boundingRect()
         self.items = self.graphicsScene.items()
@@ -349,8 +349,9 @@ class CellClickedCommand(QUndoCommand):
         page = model.pageAtIndex(cellIndex)
         if page != self.page:
             filename = self.tabWidget.widget(self.tabIndex).filename
-            pattern = os.path.join(os.path.dirname(filename), page + ".*")
-            imageName = glob.glob(pattern)
+            pattern = os.path.join(os.path.dirname(filename),
+                                   "**", page + ".*")
+            imageName = glob.glob(pattern, recursive=True)
             if not imageName:
                 self.messageLabel.setText(f"{page} image not found")
                 return

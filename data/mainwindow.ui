@@ -37,7 +37,11 @@
       <widget class="QWidget" name="layoutWidget">
        <layout class="QVBoxLayout" name="verticalLayout_2">
         <item>
-         <widget class="QComboBox" name="comboBox"/>
+         <widget class="QComboBox" name="comboBox">
+          <property name="editable">
+           <bool>true</bool>
+          </property>
+         </widget>
         </item>
         <item>
          <widget class="QScrollArea" name="scrollArea">
@@ -93,6 +97,8 @@
     <addaction name="separator"/>
     <addaction name="actionNext_Item"/>
     <addaction name="actionPrevious_Item"/>
+    <addaction name="actionNext_Page"/>
+    <addaction name="actionPrevious_Page"/>
     <addaction name="separator"/>
     <addaction name="actionNext_Label"/>
     <addaction name="actionPrevious_Label"/>
@@ -136,6 +142,8 @@
    <addaction name="actionSend_To_Right"/>
    <addaction name="actionNext_Item"/>
    <addaction name="actionPrevious_Item"/>
+   <addaction name="actionNext_Page"/>
+   <addaction name="actionPrevious_Page"/>
    <addaction name="actionNext_Label"/>
    <addaction name="actionPrevious_Label"/>
    <addaction name="separator"/>
@@ -265,6 +273,22 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+V</string>
+   </property>
+  </action>
+  <action name="actionNext_Page">
+   <property name="text">
+    <string>Next Page</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+D</string>
+   </property>
+  </action>
+  <action name="actionPrevious_Page">
+   <property name="text">
+    <string>Previous Page</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+U</string>
    </property>
   </action>
  </widget>
@@ -600,6 +624,38 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionNext_Page</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>SelectNextPage()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>722</x>
+     <y>440</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionPrevious_Page</sender>
+   <signal>triggered()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>SelectPreviousPage()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>722</x>
+     <y>440</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>openDatasets()</slot>
@@ -624,5 +680,7 @@
   <slot>tabItemBackward()</slot>
   <slot>copy()</slot>
   <slot>paste()</slot>
+  <slot>SelectNextPage()</slot>
+  <slot>SelectPreviousPage()</slot>
  </slots>
 </ui>

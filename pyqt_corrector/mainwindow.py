@@ -165,11 +165,12 @@ class MainWindow(QMainWindow):
                 self.messageLabel)
             self.undoStack.push(openDatasetCommand)
             tabIndex = numTabs
-            modelIndex = self.tabWidget.getCurrentTableModel().index(0, 0)
-            if modelIndex.isValid():
-                self.cellClicked(tabIndex, modelIndex, prevTabIndex,
-                                 prevModelIndex)
-            self.undoStack.endMacro()
+            if self.tabWidget.count() > 0:
+                modelIndex = self.tabWidget.getTableModel(tabIndex).index(0, 0)
+                if modelIndex.isValid():
+                    self.cellClicked(tabIndex, modelIndex, prevTabIndex,
+                                     prevModelIndex)
+                self.undoStack.endMacro()
 
     @Slot(int)
     def currentTabChanged(self, index):
@@ -182,7 +183,8 @@ class MainWindow(QMainWindow):
     def cellClicked(self, tabIndex, cellIndex, prevTabIndex, prevCellIndex):
         cellClickedCommand = CellClickedCommand(
             tabIndex, cellIndex, prevTabIndex, prevCellIndex, self.tabWidget,
-            self.graphicsScene, self.graphicsView, self.comboBox)
+            self.graphicsScene, self.graphicsView, self.comboBox,
+            self.messageLabel)
         self.undoStack.push(cellClickedCommand)
 
     @Slot()
@@ -196,7 +198,8 @@ class MainWindow(QMainWindow):
             cellIndex = model.index(nextRow, prevCellIndex.column())
             cellClickedCommand = CellClickedCommand(
                 tabIndex, cellIndex, tabIndex, prevCellIndex, self.tabWidget,
-                self.graphicsScene, self.graphicsView, self.comboBox)
+                self.graphicsScene, self.graphicsView, self.comboBox,
+                self.messageLabel)
             self.undoStack.push(cellClickedCommand)
 
     @Slot()
@@ -210,7 +213,48 @@ class MainWindow(QMainWindow):
             cellIndex = model.index(nextRow, prevCellIndex.column())
             cellClickedCommand = CellClickedCommand(
                 tabIndex, cellIndex, tabIndex, prevCellIndex, self.tabWidget,
-                self.graphicsScene, self.graphicsView, self.comboBox)
+                self.graphicsScene, self.graphicsView, self.comboBox,
+                self.messageLabel)
+            self.undoStack.push(cellClickedCommand)
+
+    @Slot()
+    def SelectNextPage(self):
+        if self.tabWidget.count() > 0:
+            tabIndex = self.tabWidget.currentIndex()
+            prevCellIndex = self.tabWidget.getCurrentSelectedCell()
+            model = self.tabWidget.getCurrentTableModel()
+            prevPage = model.pageAtIndex(prevCellIndex)
+            rowCount = model.rowCount(QModelIndex())
+            for i in range(0, rowCount):
+                row = (prevCellIndex.row() + i) % rowCount
+                cellIndex = model.index(row, prevCellIndex.column())
+                page = model.pageAtIndex(cellIndex)
+                if prevPage.split("-")[0] != page.split("-")[0]:
+                    break
+            cellClickedCommand = CellClickedCommand(
+                tabIndex, cellIndex, tabIndex, prevCellIndex, self.tabWidget,
+                self.graphicsScene, self.graphicsView, self.comboBox,
+                self.messageLabel)
+            self.undoStack.push(cellClickedCommand)
+
+    @Slot()
+    def SelectPreviousPage(self):
+        if self.tabWidget.count() > 0:
+            tabIndex = self.tabWidget.currentIndex()
+            prevCellIndex = self.tabWidget.getCurrentSelectedCell()
+            model = self.tabWidget.getCurrentTableModel()
+            prevPage = model.pageAtIndex(prevCellIndex)
+            rowCount = model.rowCount(QModelIndex())
+            for i in range(0, rowCount):
+                row = (prevCellIndex.row() - i) % rowCount
+                cellIndex = model.index(row, prevCellIndex.column())
+                page = model.pageAtIndex(cellIndex)
+                if prevPage.split("-")[0] != page.split("-")[0]:
+                    break
+            cellClickedCommand = CellClickedCommand(
+                tabIndex, cellIndex, tabIndex, prevCellIndex, self.tabWidget,
+                self.graphicsScene, self.graphicsView, self.comboBox,
+                self.messageLabel)
             self.undoStack.push(cellClickedCommand)
 
     @Slot()
