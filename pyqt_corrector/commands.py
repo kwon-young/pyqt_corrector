@@ -1,5 +1,6 @@
 import os
 import glob
+import mimetypes
 from PySide2.QtWidgets import QUndoCommand, QComboBox, QGridLayout, \
     QLabel
 from PySide2.QtCore import QModelIndex, QMarginsF, Qt
@@ -352,6 +353,8 @@ class CellClickedCommand(QUndoCommand):
             pattern = os.path.join(os.path.dirname(filename),
                                    "**", page + ".*")
             imageName = glob.glob(pattern, recursive=True)
+            imageName = [name for name in imageName
+                         if 'image' in mimetypes.guess_type(name)[0]]
             if not imageName:
                 self.messageLabel.setText(f"{page} image not found")
                 return
