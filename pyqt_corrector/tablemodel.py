@@ -77,6 +77,8 @@ class TableModel(QAbstractTableModel):
             return None
 
         if role == Qt.DisplayRole:
+            if index.column() == 3:
+                return float(self._data.iloc[index.row()][index.column()])
             return self._data.iloc[index.row()][index.column()]
         if role == Qt.UserRole:
             page = self._data["page"][index.row()]
@@ -170,8 +172,14 @@ class TableModel(QAbstractTableModel):
         return self.setData(index, label, Qt.EditRole)
 
     def makeRowData(self, page, label, box):
-        return pd.Series([page, label, QRectF2Box(box)],
-                         index=self._data.columns)
+        if self.columnCount(QModelIndex()) == 4 and 'score' == self._data.columns[3]:
+            return pd.Series([page, label, QRectF2Box(box), 0],
+                             index=self._data.columns)
+        elif self.columnCount(QModelIndex()) == 3:
+            return pd.Series([page, label, QRectF2Box(box)],
+                             index=self._data.columns)
+        else:
+            raise "Invalid Number of Columns"
 
     def appendRow(self, rowData):
         if self._data is None:
