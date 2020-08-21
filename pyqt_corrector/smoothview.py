@@ -1,6 +1,7 @@
 from PySide2.QtWidgets import QGraphicsView
 from PySide2.QtCore import Signal, Slot, Qt, QPointF, QTimeLine, QRectF
-from PySide2.QtGui import QKeyEvent, QWheelEvent, QMouseEvent
+from PySide2.QtGui import QKeyEvent, QWheelEvent, QMouseEvent, QCursor, \
+    QVector2D
 
 
 class SmoothView(QGraphicsView):
@@ -24,6 +25,9 @@ class SmoothView(QGraphicsView):
         self.prevSceneRect = None
         self.toggleMove = False
         self._anim = None
+        self._wheelEventMousePos = None
+        self.setTransformationAnchor(QGraphicsView.NoAnchor)
+        self.setResizeAnchor(QGraphicsView.NoAnchor)
 
     def keyPressEvent(self, event: QKeyEvent):
         if event.key() == Qt.Key_Control:
@@ -48,6 +52,7 @@ class SmoothView(QGraphicsView):
             if self._anim:
                 self._anim.setCurrentTime(0)
             else:
+                self._wheelEventMousePos = event.pos()
                 self._anim: QTimeLine = QTimeLine(350, self)
                 self._anim.setUpdateInterval(20)
 
@@ -60,9 +65,37 @@ class SmoothView(QGraphicsView):
 
     @Slot()
     def scalingTime(self, x):
+        oldPos = self.mapToScene(self._wheelEventMousePos)
+
         factor = 1.0 + self._numScheduledScalings / 100.0
         self.scale(factor, factor)
         self._numScheduledScalings -= self._numScheduledScalings * x * x
+
+        # compute normalized direction vector from viewport center to cursor
+        sceneRect = self.viewport().geometry()
+        cursor = QCursor()
+        cursorPos = self.mapFromGlobal(cursor.pos())
+        vector = QVector2D(cursorPos - sceneRect.center())
+        if vector.length() < 5:
+            vector = QVector2D(0, 0)
+        else:
+            vector.normalize()
+        vector *= 5 * x
+
+        if factor > 1:
+            # drift the viewport so that the point below cursor get closer
+            # to the center of the viewport
+            newPos = QPointF(self._wheelEventMousePos) - vector.toPointF()
+            newPos = newPos.toPoint()
+            # drift the cursor to have the sensation that the mouse is tracking
+            # the object below the cursor
+            newCursorPos = (QPointF(cursorPos) - vector.toPointF()).toPoint()
+            cursor.setPos(self.mapToGlobal(newCursorPos))
+        else:
+            newPos = self._wheelEventMousePos
+        newPos = self.mapToScene(newPos)
+        delta = newPos - oldPos
+        self.translate(delta.x(), delta.y())
 
     @Slot()
     def animFinished(self):
