@@ -352,14 +352,18 @@ class CellClickedCommand(QUndoCommand):
             filename = self.tabWidget.widget(self.tabIndex).filename
             pattern = os.path.join(os.path.dirname(filename),
                                    "**", page + ".*")
-            imageName = glob.glob(pattern, recursive=True)
-            imageName = [name for name in imageName
-                         if 'image' in mimetypes.guess_type(name)[0]]
+            possibleNames = glob.glob(pattern, recursive=True)
+            imageName = None
+            for name in possibleNames:
+                mtypes = mimetypes.guess_type(name)
+                if isinstance(mtypes[0], str) and 'image' in mtypes[0]:
+                    imageName = name
+                    break
             if not imageName:
                 self.messageLabel.setText(f"{page} image not found")
                 return
             self.graphicsScene.removeAllItems()
-            pixmap = QPixmap(imageName[0])
+            pixmap = QPixmap(imageName)
             self.graphicsScene.setPage(page, pixmap)
         if page != self.page or self.tabIndex != self.prevTabIndex:
             self.graphicsScene.removeAllBoxes()
