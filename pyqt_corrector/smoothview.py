@@ -23,6 +23,7 @@ class SmoothView(QGraphicsView):
         self.setMouseTracking(True)
         self.prevSceneRect = None
         self.toggleMove = False
+        self._anim = None
 
     def keyPressEvent(self, event: QKeyEvent):
         if event.key() == Qt.Key_Control:
@@ -44,24 +45,29 @@ class SmoothView(QGraphicsView):
                 self._numScheduledScalings = min(numSteps.y(),
                                                  self._maxScaling)
 
-            anim: QTimeLine = QTimeLine(350, self)
-            anim.setUpdateInterval(20)
+            if self._anim:
+                self._anim.setCurrentTime(0)
+            else:
+                self._anim: QTimeLine = QTimeLine(350, self)
+                self._anim.setUpdateInterval(20)
 
-            anim.valueChanged.connect(self.scalingTime)
-            anim.finished.connect(self.animFinished)
-            anim.start()
+                self._anim.valueChanged.connect(self.scalingTime)
+                self._anim.finished.connect(self.animFinished)
+                self._anim.start()
+
         else:
             super().wheelEvent(event)
 
     @Slot()
     def scalingTime(self, x):
-        factor = 1.0 + self._numScheduledScalings / 2000.0
+        factor = 1.0 + self._numScheduledScalings / 100.0
         self.scale(factor, factor)
+        self._numScheduledScalings -= self._numScheduledScalings * x * x
 
     @Slot()
     def animFinished(self):
-        anim = self.sender()
-        del anim
+        del self._anim
+        self._anim = None
 
     def mousePressEvent(self, event: QMouseEvent):
         if event.button() == Qt.LeftButton:
