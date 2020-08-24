@@ -339,6 +339,7 @@ class CellClickedCommand(QUndoCommand):
         self.tabWidget.previousTabIndex = self.prevTabIndex
         self.comboBox.blockSignals(True)
         self.comboBox.setCurrentText(self.label)
+        self.comboBox.setCurrentIndex(self.comboBox.findText(self.label))
         self.comboBox.blockSignals(False)
 
     def redo(self):
@@ -385,6 +386,7 @@ class CellClickedCommand(QUndoCommand):
         self.graphicsView.setFocus()
         self.comboBox.blockSignals(True)
         self.comboBox.setCurrentText(box.label)
+        self.comboBox.setCurrentIndex(self.comboBox.findText(self.label))
         self.comboBox.blockSignals(False)
         self.setText(f"clicked row {self.tabIndex}:{self.row}")
 
@@ -437,6 +439,7 @@ class LabelChangedCommand(QUndoCommand):
             self.cellIndex.row(), self.prevLabel)
         self.comboBox.blockSignals(True)
         self.comboBox.setCurrentText(self.prevLabel)
+        self.comboBox.setCurrentIndex(self.comboBox.findText(self.prevLabel))
         self.comboBox.blockSignals(False)
         self.graphicsScene.box(self.tabIndex, self.cellIndex.row()).setColor(
             self.prevColor)
@@ -447,6 +450,7 @@ class LabelChangedCommand(QUndoCommand):
     def redo(self):
         self.comboBox.blockSignals(True)
         self.comboBox.setCurrentText(self.label)
+        self.comboBox.setCurrentIndex(self.comboBox.findText(self.label))
         self.comboBox.blockSignals(False)
         self.tabWidget.getTableModel(self.tabIndex).setLabel(
             self.cellIndex.row(), self.label)
@@ -503,6 +507,7 @@ class SelectBoxCommand(QUndoCommand):
                     tabIndex, self.tabWidget.color_map(tabIndex))
         self.comboBox.blockSignals(True)
         self.comboBox.setCurrentText(self.label)
+        self.comboBox.setCurrentIndex(self.comboBox.findText(self.label))
         self.comboBox.blockSignals(False)
 
     def redo(self):
@@ -516,7 +521,9 @@ class SelectBoxCommand(QUndoCommand):
                 self.graphicsScene.changeTabColor(
                     tabIndex, self.tabWidget.color_map(tabIndex))
         self.comboBox.blockSignals(True)
-        self.comboBox.setCurrentText(model.labelAtIndex(modelIndex))
+        label = model.labelAtIndex(modelIndex)
+        self.comboBox.setCurrentText(label)
+        self.comboBox.setCurrentIndex(self.comboBox.findText(label))
         self.comboBox.blockSignals(False)
         self.setText(f"select box {self.tabIndex}:{self.rowIndex}")
 
@@ -639,6 +646,7 @@ class DeleteItemCommand(QUndoCommand):
                                      self.rect)
         self.graphicsView.fitInView(self.previousSceneRect)
         self.comboBox.setCurrentText(self.rect.label)
+        self.comboBox.setCurrentIndex(self.comboBox.findText(self.rect.label))
 
     def redo(self):
         model = self.tabWidget.getTableModel(self.tabIndex)
@@ -664,6 +672,7 @@ class CreateItemCommand(QUndoCommand):
         model.deleteRow(self.rect.rowIndex)
         self.graphicsScene.removeBox(self.rect.tabIndex, self.rect.rowIndex)
         self.comboBox.setCurrentText(self.label)
+        self.comboBox.setCurrentIndex(self.comboBox.findText(self.label))
 
     def redo(self):
         model: TableModel = self.tabWidget.getTableModel(self.rect.tabIndex)
@@ -675,6 +684,7 @@ class CreateItemCommand(QUndoCommand):
             self.graphicsScene.insertBox(
                 self.rect.tabIndex, self.rect.rowIndex, self.rect)
         self.comboBox.setCurrentText(self.rect.label)
+        self.comboBox.setCurrentIndex(self.comboBox.findText(self.rect.label))
 
 
 class ChangeTabItemZValueCommand(QUndoCommand):
