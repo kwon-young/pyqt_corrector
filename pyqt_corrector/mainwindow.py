@@ -15,6 +15,7 @@ from pyqt_corrector.commands import OpenDatasetCommand, DeleteDatasetCommand, \
     CreateItemCommand, ChangeTabItemZValueCommand, CopyCommand, PasteCommand
 from pyqt_corrector.graphicsscene import GraphicsScene
 from pyqt_corrector.graphicsitem import ResizableRect
+import data.breeze_icons
 
 
 class MainWindow(QMainWindow):
@@ -45,6 +46,8 @@ class MainWindow(QMainWindow):
         self.copyList = []
 
     def setupUi(self):
+        if QIcon.themeName() == "":
+            QIcon.setThemeName('breeze')
         self.openIcon = QIcon().fromTheme("document-open")
         self.actionOpen_Datasets.setIcon(self.openIcon)
         self.saveIcon = QIcon().fromTheme("document-save")
